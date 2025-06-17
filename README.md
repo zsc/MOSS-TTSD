@@ -6,7 +6,7 @@
     <b><em>Text to Spoken Dialogue Generation</em></b>
     </p>
     <p>
-    <img src="asset/OpenMOSS_logo.png" alt="OpenMOSS Logo">
+    <img src="asset/OpenMOSS_logo.png" alt="OpenMOSS Logo" width="300">
     <p>
     </p>
     <a href="https://blog.example.com"><img src="https://img.shields.io/badge/Blog-Read%20More-green" alt="blog"></a>
