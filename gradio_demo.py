@@ -51,7 +51,7 @@ ROLE_EXAMPLES = load_examples_from_jsonl()
 # Language configuration
 LANGUAGES = {
     "English": {
-        "title": "Asteroid Dialogue Generation",
+        "title": "MOSS-TTSD🪐 Dialogue Generation",
         "script_input": "### Script Input",
         "text_to_synthesize": "Text to Synthesize",
         "text_placeholder": "Text to be synthesized, format: [S1]Role1 text[S2]Role2 text",
@@ -79,7 +79,7 @@ LANGUAGES = {
         "role_headers": ["Text to Synthesize", "Input Mode", "Role1 Audio File", "Role1 Text", "Role2 Audio File", "Role2 Text", "Use Normalize"]
     },
     "中文": {
-        "title": "Asteroid 对话语音生成",
+        "title": "MOSS-TTSD🪐 对话语音生成",
         "script_input": "### 文本输入",
         "text_to_synthesize": "要合成的文本",
         "text_placeholder": "要合成的文本，格式：[S1]角色1文本[S2]角色2文本",
@@ -246,7 +246,7 @@ def process_single_audio_generation(
 
 # Create Gradio interface
 def create_gradio_interface() -> gr.Blocks:
-    with gr.Blocks(title="Asteroid Dialogue Generation", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="MOSS-TTSD🪐 Dialogue Generation", theme=gr.themes.Soft()) as demo:
         
         # Language selection at the top
         with gr.Row():
@@ -258,7 +258,7 @@ def create_gradio_interface() -> gr.Blocks:
             )
         
         # Title and header (will be updated based on language)
-        title_md = gr.Markdown("# Asteroid Dialogue Generation")
+        title_md = gr.Markdown("# MOSS-TTSD🪐 Dialogue Generation")
         github_md = gr.Markdown("### [Github](https://github.com/OpenMOSS/MOSS-TTSD)")
         
         with gr.Row():

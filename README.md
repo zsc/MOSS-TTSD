@@ -128,7 +128,7 @@ Before using the podcast generation tool, please ensure that environment variabl
 export OPENAI_API_KEY="your_openai_api_key"
 export OPENAI_API_BASE="your_openai_api_base"
 
-python podever_demo.py
+python podcast_generate.py
 ```
 
 ## Demos
