@@ -106,6 +106,25 @@ Example:
 
 **GPU Requirements**
 
+Our model is efficient and has low VRAM requirements.
+
+For example, when generating 600 seconds of audio at the default bf16 precision, the model uses less than 7GB of VRAM. This should make it compatible with most consumer-grade GPUs. You can estimate the VRAM needed for a specific audio length using this formula:
+
+$$
+y = 0.00172x + 5.8832
+$$
+
+Here, $x$ is the desired length of your audio in seconds, and $y$ is the estimated VRAM cost in GB.
+
+> Please note that if your own prompts (e.g., `prompt_audio_speaker1`) are longer than our default examples, VRAM usage will be higher.
+
+| Length of the Generated Audio(Second)   | GPU Memory Cost(GB) | 
+| ------------------------------- | ------------------- | 
+|                 120                 |  6.08           |
+|               300                  |   6.39            |
+|              360                     | 6.5            | 
+|               600                  |    6.91                 |
+
 ### Web UI Usage
 
 You can run the MOSS-TTSD web UI locally using Gradio. Run the following command to start the Gradio demo:
