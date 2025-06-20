@@ -17,6 +17,12 @@ SPT_CHECKPOINT_PATH = "XY_Tokenizer/weights/xy_tokenizer.ckpt"
 MAX_CHANNELS = 8
 
 # Default audio file paths (default audio provided by user)
+# DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
+# DEFAULT_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
+# DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"  
+# DEFAULT_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
+
+# Chinese audio examples (alternative)
 DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
 DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
 DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
@@ -61,84 +67,150 @@ def extract_web_content(url):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'  # Ensure correct Chinese encoding
+        response.encoding = 'utf-8'  # Ensure correct encoding
         response.raise_for_status()
+        
+        print(f"HTTP status: {response.status_code}")
+        print(f"Response content length: {len(response.text)}")
 
         # Parse HTML content
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extract title
+        # Extract title - try multiple approaches
         title = ""
+        
+        # Try h1 tags first
         h1_tags = soup.find_all('h1')
         if h1_tags:
             for h1 in h1_tags:
                 if h1.text.strip():
                     title = h1.text.strip()
                     break
-
+        
+        # Try title tag if h1 not found
         if not title and soup.title:
-            title = soup.title.string.strip()
+            title = soup.title.string.strip() if soup.title.string else ""
+        
+        # Try meta property="og:title"
+        if not title:
+            og_title = soup.find('meta', property='og:title')
+            if og_title and og_title.get('content'):
+                title = og_title['content'].strip()
 
-        # Locate main article content
+        print(f"Extracted title: {title}")
+
+        # Locate main article content - enhanced strategy
         content_div = None
+        text_content = ""
 
-        # Try to find main content area
-        possible_content_divs = soup.find_all('div',
-                                              class_=lambda c: c and ('content' in c.lower() or 'article' in c.lower()))
-        if possible_content_divs:
-            content_div = max(possible_content_divs, key=lambda x: len(x.get_text()))
+        # Strategy 1: Look for article tags
+        articles = soup.find_all('article')
+        if articles:
+            content_div = max(articles, key=lambda x: len(x.get_text()))
+            print("Found content using <article> tags")
 
-        # If above method fails, look for areas near author/source information
+        # Strategy 2: Look for main content containers
         if not content_div:
-            author_info = soup.find(text=re.compile(r'作者：|来源：'))
-            if author_info and author_info.parent:
-                # Look up for possible content containers
-                parent = author_info.parent
-                for _ in range(5):  # Look up at most 5 levels
-                    if parent.name == 'div' and len(parent.get_text()) > 500:
-                        content_div = parent
-                        break
-                    parent = parent.parent
-                    if not parent:
-                        break
+            possible_selectors = [
+                '[role="main"]',
+                '.article-body',
+                '.post-content',
+                '.entry-content',
+                '.article-content',
+                '.content-body',
+                '.story-body',
+                '.article-text',
+                'main'
+            ]
+            
+            for selector in possible_selectors:
+                elements = soup.select(selector)
+                if elements:
+                    content_div = max(elements, key=lambda x: len(x.get_text()))
+                    print(f"Found content using selector: {selector}")
+                    break
 
-        # If still not found, try to find the longest p tag collection
+        # Strategy 3: Look for divs with content-related classes
+        if not content_div:
+            possible_content_divs = soup.find_all('div', class_=lambda c: c and any(
+                keyword in c.lower() for keyword in ['content', 'article', 'post', 'body', 'text', 'story']
+            ))
+            if possible_content_divs:
+                content_div = max(possible_content_divs, key=lambda x: len(x.get_text()))
+                print("Found content using content-related class names")
+
+        # Strategy 4: Find the section with most paragraphs
+        if not content_div:
+            all_divs = soup.find_all('div')
+            if all_divs:
+                # Find div with most paragraph content
+                best_div = None
+                max_p_length = 0
+                for div in all_divs:
+                    p_text = ' '.join([p.get_text() for p in div.find_all('p')])
+                    if len(p_text) > max_p_length:
+                        max_p_length = len(p_text)
+                        best_div = div
+                
+                if best_div and max_p_length > 200:  # At least 200 characters
+                    content_div = best_div
+                    print("Found content using paragraph density analysis")
+
+        # Strategy 5: Fallback - collect all paragraphs
         if not content_div:
             paragraphs = soup.find_all('p')
             if paragraphs:
-                # Find paragraph collection with most text
-                content_div = max(paragraphs, key=lambda x: len(x.get_text()))
+                # Filter paragraphs with substantial content
+                substantial_paragraphs = [p for p in paragraphs if len(p.get_text().strip()) > 50]
+                if substantial_paragraphs:
+                    # Create a virtual container with all substantial paragraphs
+                    text_content = '\n\n'.join([p.get_text().strip() for p in substantial_paragraphs])
+                    print(f"Found content using paragraph collection: {len(substantial_paragraphs)} paragraphs")
 
-        # Extract main content
-        text_content = ""
-        if content_div:
+        # Extract content from found container
+        if content_div and not text_content:
             # Remove unwanted elements
-            for unwanted in content_div.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+            for unwanted in content_div.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
                 unwanted.decompose()
 
             # Get cleaned text
             text_content = content_div.get_text(separator='\n', strip=True)
-        else:
-            # Fallback: get all text from body
+
+        # Final fallback: get all text from body
+        if not text_content:
             body = soup.find('body')
             if body:
-                for unwanted in body.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+                for unwanted in body.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
                     unwanted.decompose()
                 text_content = body.get_text(separator='\n', strip=True)
+                print("Using fallback: extracted all body text")
 
         # Clean text
-        # Remove extra blank lines
-        cleaned_text = re.sub(r'\n{2,}', '\n\n', text_content)
-        # Remove extra spaces
-        cleaned_text = re.sub(r' {2,}', ' ', cleaned_text)
-
-        return title, cleaned_text
+        if text_content:
+            # Remove extra blank lines
+            cleaned_text = re.sub(r'\n{3,}', '\n\n', text_content)
+            # Remove extra spaces
+            cleaned_text = re.sub(r' {2,}', ' ', cleaned_text)
+            # Remove very short lines (likely navigation or metadata)
+            lines = cleaned_text.split('\n')
+            filtered_lines = [line.strip() for line in lines if len(line.strip()) > 10]
+            cleaned_text = '\n'.join(filtered_lines)
+            
+            print(f"Final content length: {len(cleaned_text)} characters")
+            print(f"Content preview: {cleaned_text[:200]}...")
+            
+            return title, cleaned_text
+        else:
+            print("No content extracted")
+            return None
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
     except Exception as e:
         print(f"Parse error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
@@ -219,7 +291,7 @@ def parse_input_content(input_path):
 
 # =============== Dialogue Script Generation Function ===============
 
-def generate_podcast_script(content):
+def generate_podcast_script(content, language='zh'):
     """Call large model to generate podcast dialogue script"""
     from openai import OpenAI
 
@@ -228,10 +300,9 @@ def generate_podcast_script(content):
         base_url=os.getenv("OPENAI_API_BASE", "YOUR_API_BASE_URL"),
     )
 
-    
-    role_play = "两位中文播客主持人"
-    
-    instruction = f"""你是一位专业的中文播客文字脚本撰稿人。现在请你根据提供的有关最新AI及大模型相关进展的原始资料，生成一段模拟{role_play}之间的自然对话脚本。该脚本应符合以下具体要求：
+    if language == 'zh':
+        role_play = "两位中文播客主持人"
+        instruction = f"""你是一位专业的中文播客文字脚本撰稿人。现在请你根据提供的有关最新AI及大模型相关进展的原始资料，生成一段模拟{role_play}之间的自然对话脚本。该脚本应符合以下具体要求：
     一、语言风格
     - 使用较为自然、随意、轻松的日常中文表达；
     - 优先采用简单易懂的词汇，避免书面用语，将书面表达转换为符合口语表达的形式，但不改变专业词汇的内容；
@@ -268,6 +339,46 @@ def generate_podcast_script(content):
 
     请根据以上要求和提供的原始资料，将其转化为符合以上所有要求的播客对话脚本。一定要用[S1]和[S2]标记两位说话人，绝对不能使用任何其它符号标记说话人。
     注意：直接输出结果，不要包含任何额外信息。
+    """
+    else: # Default to English
+        role_play = "two English podcast hosts"
+        instruction = f"""You are a professional English podcast scriptwriter. Based on the provided source material about the latest developments in AI and large models, generate a natural conversational script simulating a dialogue between {role_play}. The script should meet the following specific requirements:
+    I. Language Style
+    - Use natural, casual, and relaxed everyday English expressions.
+    - Prioritize simple and easy-to-understand vocabulary, avoiding formal language. Convert written expressions into spoken language forms without changing the content of professional terms.
+    - Appropriately include internet slang, colloquialisms, and idioms to enhance authenticity.
+    - The dialogue should feel like a conversation between {role_play}.
+
+    II. Sentence Structure
+    - Use loose and natural sentence structures, allowing for spoken features like repetition, pauses, and filler words.
+    - Encourage the use of repetition (e.g., "very, very," "take it slow") and filler words (e.g., "like," "actually," "so," "you know," "uh," etc.).
+    - Appropriately insert vague expressions and slightly emotional tones to enhance approachability.
+
+    III. Dialogue Structure
+    - The two speakers should take turns speaking, marked with [S1] and [S2] for each turn. Do not add a newline between [S1] and [S2].
+    - When one person is speaking, the other can appropriately insert short, natural feedback or connecting phrases (e.g., "Yeah.", "Right.", "Exactly.", "I see.", "Okay.") to show they are listening.
+    - The conversation should have an introduction, a core discussion, and a natural conclusion, with a rhythmic and varied tone, avoiding a flat narrative.
+    - The total length should be controlled to within a 10-minute reading time (no more than 1500 words). Do not exceed the time limit.
+    - **Emphasize active feedback from the listener: When one speaker is explaining a point, the other should frequently interject with short connecting or feedback words (e.g., "Mhm.", "Yeah.", "Right.", "Oh.", "I see.", "Okay.", "Got it.", "Makes sense.", "Totally.") to show active listening, understanding, and engagement. This feedback should be naturally interspersed at pauses or transitions in the speaker's sentences, not as abrupt interruptions. For example: [S2] I'm not a big believer in horoscopes, actually. [S1] Mhm. [S2] At first, like most people who don't believe in them, I thought, uh, you can't just divide people into twelve types, [S1] Right. [S2] and then what it says is just correct. Use this kind of feedback as much as possible; don't be stingy.**
+
+    IV. Punctuation and Formatting
+    - Use only standard English punctuation: commas, periods, question marks.
+    - Do not use exclamation marks. Do not use special symbols like ellipses ('...'), parentheses, quotation marks (including ''""'"), or dashes.
+    - Spell out numbers as words, e.g., "1,000,000" as "one million".
+    - Intelligently determine how to pronounce numbers based on context. Spell out abbreviations with numbers, e.g., "a2b" as "a to b", "gpt-4o" as "GPT four O", "3:4" as "three to four". If "2021" is a year, it should be "twenty twenty-one", but if it's a number, it should be "two thousand twenty-one". Ensure you translate it appropriately based on context, not just as a simple conversion.
+
+    V. Content Requirements
+    - All content must be rewritten based on the source material; do not copy its written expressions. All information from the source material must be mentioned completely, without omissions.
+    - You can add appropriate background explanations, roasts, comparisons, associations, and questions to enhance the rhythm and fun of the dialogue.
+    - Ensure high information density and that citations have complete context so the audience can understand.
+    - Do not output things like "I am S1" or "I am S2" within the dialogue.
+    - If there are technical terms, provide explanations. For abstract technical points, use analogies or metaphors to make them less obscure.
+
+    ## Source Material
+    {content}
+
+    Please convert the provided source material into a podcast dialogue script that meets all the above requirements. Be sure to mark the two speakers with [S1] and [S2], and absolutely do not use any other symbols to mark the speakers.
+    Note: Output the result directly without any extra information.
     """
 
     try:
@@ -314,12 +425,13 @@ def generate_podcast_script(content):
 
 # =============== Main Function ===============
 
-def process_input_to_audio(input_path: str, output_dir: str = "examples"):
+def process_input_to_audio(input_path: str, output_dir: str = "examples", language: str = 'zh'):
     """Complete processing pipeline: from input to audio output
     
     Args:
         input_path (str): Input path (URL, PDF or TXT file)
         output_dir (str): Output directory
+        language (str): Language for the podcast script ('en' or 'zh')
     """
     
     # 1. Parse input content
@@ -333,7 +445,7 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples"):
     
     # 2. Use large model to generate dialogue script
     print("\nStep 2: Generate dialogue script")
-    script = generate_podcast_script(content)
+    script = generate_podcast_script(content, language=language)
     if not script:
         print("Dialogue script generation failed, program terminated")
         return
@@ -395,11 +507,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate podcast audio: supports URL, PDF or TXT file input")
     parser.add_argument("input_path", help="Input path: URL address, PDF file path or TXT file path")
     parser.add_argument("-o", "--output", default="outputs", help="Output directory (default: outputs)")
+    parser.add_argument("-l", "--language", default="zh", choices=['en', 'zh'], help="Language of the podcast script (en or zh, default: zh)")
     
     args = parser.parse_args()
     
     # Use command line arguments
     print(f"Input path: {args.input_path}")
     print(f"Output directory: {args.output}")
+    print(f"Script language: {args.language}")
     
-    process_input_to_audio(args.input_path, args.output)
+    process_input_to_audio(args.input_path, args.output, args.language)
