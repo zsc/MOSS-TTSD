@@ -196,8 +196,8 @@ def process_single_audio_generation(
             return None, "Error: Please select a mode and provide corresponding audio files\n- Single Audio Mode: Provide one audio file and corresponding text\n- Role Mode: Provide audio files for Role1 and Role2"
         
         # Set random seed to ensure reproducible results
-        import accelerate
-        accelerate.utils.set_seed(42)
+        # import accelerate
+        # accelerate.utils.set_seed(42)
         
         # Process batch (single item)
         actual_texts_data, audio_results = process_batch(
