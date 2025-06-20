@@ -148,7 +148,7 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 
 
 ## Demos
-### Dialogue generation
+
 <style>
     table.demo-table {
         width: 100%;
@@ -168,6 +168,8 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
         margin-right: auto;
     }
 </style>
+
+### Dialogue generation
 
 <table class="demo-table">
     <thead>
@@ -205,25 +207,6 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 </table>
 
 ### Voice Clone
-<style>
-    table.demo-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    table.demo-table th, table.demo-table td {
-        border: 1px solid #dfe2e5;
-        padding: 6px 13px;
-    }
-    table.demo-table th {
-        font-weight: 600;
-    }
-    table.demo-table td audio {
-        max-width: 250px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
 
 <table class="demo-table">
     <thead>
@@ -240,35 +223,35 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
             <td style="text-align: left;"><strong>Jia Ling and Liu Dehua(ZH)</strong></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/jl.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/ldh.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
+            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone1_mooncast.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
         </tr>
         <tr>
             <td style="text-align: left;"><strong>Pan Changjiang and gazi(ZH)</strong></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/pcj.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/gz.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
+            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone2_mooncast.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
         </tr>
         <tr>
             <td style="text-align: left;"><strong>G.E.M. and Jay(ZH)</strong></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/dzq.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/jay.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
+            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone3_mooncast.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
         </tr>
         <tr>
             <td style="text-align: left;"><strong>Elon Musk and Jensen</strong></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Elon Musk.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Jensen.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
+            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone4_mooncast.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
         </tr>
         <tr>
             <td style="text-align: left;"><strong>Trump and Obama</strong></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Trump.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Obama.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
+            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone5_mooncast.mp3">Your browser does not support the audio element.</audio></td>
             <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
         </tr>
     </tbody>
@@ -276,25 +259,6 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 
 
 ### Sound Event
-<style>
-    table.demo-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    table.demo-table th, table.demo-table td {
-        border: 1px solid #dfe2e5;
-        padding: 6px 13px;
-    }
-    table.demo-table th {
-        font-weight: 600;
-    }
-    table.demo-table td audio {
-        max-width: 250px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
 
 <table class="demo-table">
     <thead>
@@ -319,25 +283,6 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 </table>
 
 ### Podcast generation
-<style>
-    table.demo-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    table.demo-table th, table.demo-table td {
-        border: 1px solid #dfe2e5;
-        padding: 6px 13px;
-    }
-    table.demo-table th {
-        font-weight: 600;
-    }
-    table.demo-table td audio {
-        max-width: 250px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
 
 <table class="demo-table">
     <thead>
