@@ -135,7 +135,7 @@ python podcast_generate.py "https://www.example.com/article"
 python podcast_generate.py "examples/Attention Is All You Need.pdf"
 
 # Process text file
-python podcast_generate.py "your_article.txt"
+python podcast_generate.py "examples/example.txt"
 
 # Custom output directory
 python podcast_generate.py "your_input" -o "your_output"
