@@ -115,9 +115,7 @@ def load_audio_data(prompt_audio, target_sample_rate=16000):
         return wav
     except Exception as e:
         print(f"Error loading audio data: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+        raise
 
 
 def _load_single_audio(audio_input):
@@ -167,7 +165,7 @@ def merge_speaker_audios(wav1, sr1, wav2, sr2, target_sample_rate=16000):
         return merged_wav
     except Exception as e:
         print(f"Error merging audio: {e}")
-        return None
+        raise
 
 
 def process_inputs(tokenizer, spt, prompt, text, device, audio_data=None, max_channels=8, pad_token=1024):
@@ -196,9 +194,7 @@ def process_inputs(tokenizer, spt, prompt, text, device, audio_data=None, max_ch
             input_ids = np.concatenate([input_ids, audio_token])[:-60]
         except Exception as e:
             print(f"Error processing audio data: {e}")
-            import traceback
-            traceback.print_exc()
-            # If error occurs, still return input without audio
+            raise
     
     return input_ids
 
@@ -434,7 +430,7 @@ def process_batch(batch_items, tokenizer, model, spt, device, system_prompt, sta
                 print(f"Audio generation completed: sample {start_idx + i}")
                 
             except Exception as e:
-                print(f"Error processing sample {start_idx + i}: {str(e)}")
+                print(f"Error processing sample {start_idx + i}: {str(e)}, skipping...")
                 import traceback
                 traceback.print_exc()
                 audio_results.append(None)
@@ -447,6 +443,4 @@ def process_batch(batch_items, tokenizer, model, spt, device, system_prompt, sta
         
     except Exception as e:
         print(f"Error during batch processing: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return [], [None] * len(batch_items)
+        raise
