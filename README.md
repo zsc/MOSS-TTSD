@@ -31,7 +31,6 @@ MOSS-TTSD supports voice cloning and single-session speech generation of up to 9
 - **Highly Expressive Dialogue Speech**: Built on unified semantic-acoustic neural audio codec, a pre-trained large language model, millions of hours of TTS data, and 400k hours synthetic and real conversational speech, MOSS-TTSD generates highly expressive, human-like dialogue speech with natural conversational prosody.
 - **Two-Speaker Voice Cloning**: MOSS-TTSD supports zero-shot two speakers voice cloning and can generate conversational speech with accurate speaker swithcing based on dialogue scripts.
 - **Chinese-English Bilingual Support**: MOSS-TTSD enables highly expressive speech generation in both Chinese and English.
-- **Controllable Vocal Events**: MOSS-TTSD currently supports controllable coughing and laughter audio events using special symbols, further enhancing the human-like quality of the generated speech.
 - **Long-Form Speech Generation (up to 960 seconds)**: Thanks to low-bitrate codec and training framework optimization, MOSS-TTSD has been trained for long speech generation, enabling single-session speech generation of up to 960 seconds.
 - **Fully Open Source & Commercial-Ready**: MOSS-TTSD and its future updates will be fully open-source and support free commercial use.
 
@@ -52,9 +51,17 @@ MOSS-TTSD supports voice cloning and single-session speech generation of up to 9
 
 ### API Usage
 
+Powered by siliconflow. Stay tuned!
+
+### Podcast Generation
+
+We provide a podcast generation tool that directly analyzes either a URL or a user-uploaded PDF file, extracting content to generate a high-quality podcast segment.
 
 ## Demos
 
+## License
+
+MOSS-TTSD is released under the Apache 2.0 license.
 
 ## Citation
 
