@@ -74,6 +74,36 @@ Parameters:
 - `--seed`: Random seed for reproducibility.
 - `--use_normalize`: Whether to normalize the text input (default is `True`).
 
+#### JSONL Input Format
+
+The input JSONL file should contain one JSON object per line with the following structure:
+
+```json
+{
+  "base_path": "examples",
+  "text": "[S1]Speaker 1 dialogue content[S2]Speaker 2 dialogue content[S1]...",
+  "prompt_audio_speaker1": "path/to/speaker1_audio.wav",
+  "prompt_text_speaker1": "Reference text for speaker 1 voice cloning",
+  "prompt_audio_speaker2": "path/to/speaker2_audio.wav", 
+  "prompt_text_speaker2": "Reference text for speaker 2 voice cloning"
+}
+```
+
+Field descriptions:
+- `base_path`: Base directory path for relative file paths
+- `text`: Dialogue script with speaker tags `[S1]` and `[S2]` indicating speaker turns
+- `prompt_audio_speaker1/2`: Path to reference audio files for voice cloning (relative to `base_path`)
+- `prompt_text_speaker1/2`: Reference text corresponding to the audio prompts for better voice matching
+
+The dialogue text uses speaker tags to indicate turns:
+- `[S1]`: Indicates Speaker 1 is speaking
+- `[S2]`: Indicates Speaker 2 is speaking
+
+Example:
+```
+[S1]Hello, how are you today?[S2]I'm doing great, thanks for asking![S1]That's wonderful to hear.
+```
+
 **GPU Requirements**
 
 ### Web UI Usage
