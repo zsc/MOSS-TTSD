@@ -136,8 +136,8 @@ python podcast_generate.py
 ## Evaluation
 | Model      | Speaker Accuracy (↑) | Corrected Speaker Accuracy (↑) | Speaker Similarity (↑) | WER (↓) | Normalized WER (↓) |
 |------------|----------------------|--------------------------------|-----------------------------|---------|--------------------|
-| Mooncast   | 0.8240               | 0.8426                         | 0.7267                      | 0.5407  | 0.2631             |
 | Asteroid   | 0.7756               | 0.8506                         | 0.7272                      | 0.2836  | 0.2257             |
+| Mooncast   | 0.8240               | 0.8426                         | 0.7267                      | 0.5407  | 0.2631             |
 
 
 We constructed a test set comprising 240 two-speaker dialogue samples. The Meta's Massively Multilingual Speech Forced Alignment (MMS-FA) model was employed to perform word-level alignment between the input text and the output audio. The output audio was subsequently segmented into sentence-level clips based on punctuation marks, with speaker labels for each segment determined by the input text.
