@@ -17,8 +17,8 @@ def main():
     parser = argparse.ArgumentParser(description="TTS inference with Asteroid model")
     parser.add_argument("--jsonl", default="examples/examples.jsonl", 
                        help="Path to JSONL file (default: examples/examples.jsonl)")
-    parser.add_argument("--seed", type=int, default=42,
-                       help="Random seed for reproducibility (default: 42)")
+    parser.add_argument("--seed", type=int, default=None,
+                       help="Random seed for reproducibility (default: None)")
     parser.add_argument("--output_dir", default="outputs",
                        help="Output directory for generated audio files (default: outputs)")
     parser.add_argument("--use_normalize", action="store_true", default=True,
@@ -51,8 +51,9 @@ def main():
         return
     
     # Fix the seed for reproducibility
-    accelerate.utils.set_seed(args.seed)
-    print(f"Set random seed to {args.seed}")
+    if args.seed is not None:
+        accelerate.utils.set_seed(args.seed)
+        print(f"Set random seed to {args.seed}")
     
     # Process the batch of items
     print("Starting inference...")

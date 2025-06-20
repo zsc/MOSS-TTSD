@@ -357,8 +357,8 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples"):
     }]
     
     # 5. Set random seed
-    import accelerate
-    accelerate.utils.set_seed(42)
+    # import accelerate
+    # accelerate.utils.set_seed(42)
     
     # 6. Generate audio
     print("\nStep 5: Generate audio")
