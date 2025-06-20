@@ -55,7 +55,7 @@ You also need to download the XY Tokenizer model weights. You can find the weigh
 
 ```bash
 mkdir -p XY_Tokenizer/weights
-wget https://huggingface.co/fnlp/XY_Tokenizer_TTSD_V0/resolve/main/xy_tokenizer.ckpt -O XY_Tokenizer/weights/xy_tokenizer.ckpt
+huggingface-cli download fnlp/XY_Tokenizer_TTSD_V0 xy_tokenizer.ckpt --local-dir ./XY_Tokenizer/weights/
 ```
 
 ## Usage

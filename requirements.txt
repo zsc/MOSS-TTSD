@@ -13,3 +13,5 @@ requests
 openai
 PyYAML
 einops
+huggingface_hub
+flash-attn

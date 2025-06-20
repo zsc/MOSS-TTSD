@@ -67,84 +67,150 @@ def extract_web_content(url):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'  # Ensure correct Chinese encoding
+        response.encoding = 'utf-8'  # Ensure correct encoding
         response.raise_for_status()
+        
+        print(f"HTTP status: {response.status_code}")
+        print(f"Response content length: {len(response.text)}")
 
         # Parse HTML content
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extract title
+        # Extract title - try multiple approaches
         title = ""
+        
+        # Try h1 tags first
         h1_tags = soup.find_all('h1')
         if h1_tags:
             for h1 in h1_tags:
                 if h1.text.strip():
                     title = h1.text.strip()
                     break
-
+        
+        # Try title tag if h1 not found
         if not title and soup.title:
-            title = soup.title.string.strip()
+            title = soup.title.string.strip() if soup.title.string else ""
+        
+        # Try meta property="og:title"
+        if not title:
+            og_title = soup.find('meta', property='og:title')
+            if og_title and og_title.get('content'):
+                title = og_title['content'].strip()
 
-        # Locate main article content
+        print(f"Extracted title: {title}")
+
+        # Locate main article content - enhanced strategy
         content_div = None
+        text_content = ""
 
-        # Try to find main content area
-        possible_content_divs = soup.find_all('div',
-                                              class_=lambda c: c and ('content' in c.lower() or 'article' in c.lower()))
-        if possible_content_divs:
-            content_div = max(possible_content_divs, key=lambda x: len(x.get_text()))
+        # Strategy 1: Look for article tags
+        articles = soup.find_all('article')
+        if articles:
+            content_div = max(articles, key=lambda x: len(x.get_text()))
+            print("Found content using <article> tags")
 
-        # If above method fails, look for areas near author/source information
+        # Strategy 2: Look for main content containers
         if not content_div:
-            author_info = soup.find(text=re.compile(r'作者：|来源：'))
-            if author_info and author_info.parent:
-                # Look up for possible content containers
-                parent = author_info.parent
-                for _ in range(5):  # Look up at most 5 levels
-                    if parent.name == 'div' and len(parent.get_text()) > 500:
-                        content_div = parent
-                        break
-                    parent = parent.parent
-                    if not parent:
-                        break
+            possible_selectors = [
+                '[role="main"]',
+                '.article-body',
+                '.post-content',
+                '.entry-content',
+                '.article-content',
+                '.content-body',
+                '.story-body',
+                '.article-text',
+                'main'
+            ]
+            
+            for selector in possible_selectors:
+                elements = soup.select(selector)
+                if elements:
+                    content_div = max(elements, key=lambda x: len(x.get_text()))
+                    print(f"Found content using selector: {selector}")
+                    break
 
-        # If still not found, try to find the longest p tag collection
+        # Strategy 3: Look for divs with content-related classes
+        if not content_div:
+            possible_content_divs = soup.find_all('div', class_=lambda c: c and any(
+                keyword in c.lower() for keyword in ['content', 'article', 'post', 'body', 'text', 'story']
+            ))
+            if possible_content_divs:
+                content_div = max(possible_content_divs, key=lambda x: len(x.get_text()))
+                print("Found content using content-related class names")
+
+        # Strategy 4: Find the section with most paragraphs
+        if not content_div:
+            all_divs = soup.find_all('div')
+            if all_divs:
+                # Find div with most paragraph content
+                best_div = None
+                max_p_length = 0
+                for div in all_divs:
+                    p_text = ' '.join([p.get_text() for p in div.find_all('p')])
+                    if len(p_text) > max_p_length:
+                        max_p_length = len(p_text)
+                        best_div = div
+                
+                if best_div and max_p_length > 200:  # At least 200 characters
+                    content_div = best_div
+                    print("Found content using paragraph density analysis")
+
+        # Strategy 5: Fallback - collect all paragraphs
         if not content_div:
             paragraphs = soup.find_all('p')
             if paragraphs:
-                # Find paragraph collection with most text
-                content_div = max(paragraphs, key=lambda x: len(x.get_text()))
+                # Filter paragraphs with substantial content
+                substantial_paragraphs = [p for p in paragraphs if len(p.get_text().strip()) > 50]
+                if substantial_paragraphs:
+                    # Create a virtual container with all substantial paragraphs
+                    text_content = '\n\n'.join([p.get_text().strip() for p in substantial_paragraphs])
+                    print(f"Found content using paragraph collection: {len(substantial_paragraphs)} paragraphs")
 
-        # Extract main content
-        text_content = ""
-        if content_div:
+        # Extract content from found container
+        if content_div and not text_content:
             # Remove unwanted elements
-            for unwanted in content_div.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+            for unwanted in content_div.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
                 unwanted.decompose()
 
             # Get cleaned text
             text_content = content_div.get_text(separator='\n', strip=True)
-        else:
-            # Fallback: get all text from body
+
+        # Final fallback: get all text from body
+        if not text_content:
             body = soup.find('body')
             if body:
-                for unwanted in body.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+                for unwanted in body.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
                     unwanted.decompose()
                 text_content = body.get_text(separator='\n', strip=True)
+                print("Using fallback: extracted all body text")
 
         # Clean text
-        # Remove extra blank lines
-        cleaned_text = re.sub(r'\n{2,}', '\n\n', text_content)
-        # Remove extra spaces
-        cleaned_text = re.sub(r' {2,}', ' ', cleaned_text)
-
-        return title, cleaned_text
+        if text_content:
+            # Remove extra blank lines
+            cleaned_text = re.sub(r'\n{3,}', '\n\n', text_content)
+            # Remove extra spaces
+            cleaned_text = re.sub(r' {2,}', ' ', cleaned_text)
+            # Remove very short lines (likely navigation or metadata)
+            lines = cleaned_text.split('\n')
+            filtered_lines = [line.strip() for line in lines if len(line.strip()) > 10]
+            cleaned_text = '\n'.join(filtered_lines)
+            
+            print(f"Final content length: {len(cleaned_text)} characters")
+            print(f"Content preview: {cleaned_text[:200]}...")
+            
+            return title, cleaned_text
+        else:
+            print("No content extracted")
+            return None
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
     except Exception as e:
         print(f"Parse error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
