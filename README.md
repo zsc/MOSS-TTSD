@@ -148,164 +148,143 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 
 
 ## Demos
-
-<style>
-    table.demo-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    table.demo-table th, table.demo-table td {
-        border: 1px solid #dfe2e5;
-        padding: 6px 13px;
-    }
-    table.demo-table th {
-        font-weight: 600;
-    }
-    table.demo-table td audio {
-        max-width: 250px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
-
 ### Dialogue generation
 
-<table class="demo-table">
-    <thead>
-        <tr>
-            <th style="text-align: left;">Category</th>
-            <th style="text-align: center;">prompt1</th>
-            <th style="text-align: center;">prompt2</th>
-            <th style="text-align: center;">Mooncast</th>
-            <th style="text-align: center;">MOSS-TTSD-v0</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align: left;"><strong>Context Learning Discussion(ZH)</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_1.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_2.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/demo1_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/demo1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Game Discussion(ZH)</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_3.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_4.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/demo2_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/demo2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Asteroid TTS Talk</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_1.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_2.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/demo3_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/demo3_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-    </tbody>
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>prompt1</th>
+      <th>prompt2</th>
+      <th>Mooncast</th>
+      <th>MOSS-TTSD-v0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Context Learning Discussion(ZH)</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_1.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_2.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/others/demo1_mooncast.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/demo1_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Game Discussion(ZH)</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_3.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_4.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/others/demo2_mooncast.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/demo2_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Asteroid TTS Talk</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_1.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_2.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/others/demo3_mooncast.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/demo3_mossttsd.mp3"></audio></td>
+    </tr>
+  </tbody>
 </table>
 
 ### Voice Clone
 
-<table class="demo-table">
-    <thead>
-        <tr>
-            <th style="text-align: left;">Category</th>
-            <th style="text-align: center;">prompt1</th>
-            <th style="text-align: center;">prompt2</th>
-            <th style="text-align: center;">Mooncast</th>
-            <th style="text-align: center;">MOSS-TTSD-v0</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align: left;"><strong>Jia Ling and Liu Dehua(ZH)</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/jl.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/ldh.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone1_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Pan Changjiang and gazi(ZH)</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/pcj.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/gz.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone2_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>G.E.M. and Jay(ZH)</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/dzq.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/jay.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone3_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Elon Musk and Jensen</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Elon Musk.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Jensen.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone4_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Trump and Obama</strong></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Trump.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/prompt_audio/Obama.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/voiceclone5_mooncast.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-    </tbody>
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>prompt1</th>
+      <th>prompt2</th>
+      <th>Mooncast</th>
+      <th>MOSS-TTSD-v0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Jia Ling and Liu Dehua(ZH)</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/jl.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/ldh.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Pan Changjiang and Gazi(ZH)</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/pcj.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/gz.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>G.E.M. and Jay(ZH)</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/dzq.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/jay.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Elon Musk and Jensen Huang</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/Elon Musk.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/Jensen.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Trump and Obama</strong></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/Trump.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/prompt_audio/Obama.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3"></audio></td>
+    </tr>
+  </tbody>
 </table>
-
 
 ### Sound Event
 
-<table class="demo-table">
-    <thead>
-        <tr>
-            <th style="text-align: left;">Category</th>
-            <th style="text-align: center;">text</th>
-            <th style="text-align: center;">MOSS-TTSD-v0</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align: left;"><strong>Cough(ZH)</strong></td>
-            <td style="text-align: left;">[S1] 今晚你来吗？<br>[S2] (咳)估计去不了，人有点不舒服。<br>[S1] 啊这样啊，那你好好休息。<br>[S2] 没事儿，你们玩开心点。</td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/soundevent1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: left;"><strong>Laugh(ZH)</strong></td>
-            <td style="text-align: left;">[S1] 哎你看见刚才那人的帽子没？<br>[S2] (笑)看见了！上头居然有个螺旋桨！<br>[S1]我真是服了，怎么会有人戴那种帽子。</td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/soundevent2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-    </tbody>
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>text</th>
+      <th>MOSS-TTSD-v0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cough(ZH)</strong></td>
+      <td>[S1] 今晚你来吗？<br>[S2] (咳)估计去不了，人有点不舒服。<br>[S1] 啊这样啊，那你好好休息。<br>[S2] 没事儿，你们玩开心点。</td>
+      <td><audio controls src="./asset/demo_audio/soundevent1_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><strong>Laugh(ZH)</strong></td>
+      <td>[S1] 哎你看见刚才那人的帽子没？<br>[S2] (笑)看见了！上头居然有个螺旋桨！<br>[S1]我真是服了，怎么会有人戴那种帽子。</td>
+      <td><audio controls src="./asset/demo_audio/soundevent2_mossttsd.mp3"></audio></td>
+    </tr>
+  </tbody>
 </table>
 
 ### Podcast generation
 
-<table class="demo-table">
-    <thead>
-        <tr>
-            <th style="text-align: center;">Doubao podcast(ZH)</th>
-            <th style="text-align: center;">MOSS-TTSD-v0(ZH)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/podcast1_doubao.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/podcast1_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/podcast2_doubao.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/podcast2_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/others/podcast3_doubao.mp3">Your browser does not support the audio element.</audio></td>
-            <td style="text-align: center;"><audio controls src="./asset/demo_audio/podcast3_mossttsd.mp3">Your browser does not support the audio element.</audio></td>
-        </tr>
-    </tbody>
+<table>
+  <thead>
+    <tr>
+      <th>Doubao podcast(ZH)</th>
+      <th>MOSS-TTSD-v0(ZH)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><audio controls src="./asset/demo_audio/others/podcast1_doubao.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/podcast1_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><audio controls src="./asset/demo_audio/others/podcast2_doubao.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/podcast2_mossttsd.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td><audio controls src="./asset/demo_audio/others/podcast3_doubao.mp3"></audio></td>
+      <td><audio controls src="./asset/demo_audio/podcast3_mossttsd.mp3"></audio></td>
+    </tr>
+  </tbody>
 </table>
+
 
 ## Evaluation
 | Model      | Speaker Accuracy (↑) | Corrected Speaker Accuracy (↑) | Speaker Similarity (↑) | WER (↓) | Normalized WER (↓) |
