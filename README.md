@@ -139,7 +139,12 @@ python podcast_generate.py "examples/example.txt"
 
 # Custom output directory
 python podcast_generate.py "your_input" -o "your_output"
+
+# Generate a podcast in Chinese
+python podcast_generate.py "your_input" -l zh
 ```
+
+The tool supports generating scripts in both English (`en`) and Chinese (`zh`), defaulting to English. You can use the `--language` or `-l` flag to specify the language.
 
 ## Demos
 

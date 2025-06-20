@@ -17,10 +17,16 @@ SPT_CHECKPOINT_PATH = "XY_Tokenizer/weights/xy_tokenizer.ckpt"
 MAX_CHANNELS = 8
 
 # Default audio file paths (default audio provided by user)
-DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
-DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER2 = "如果大家想听到更丰富更及时的直播内容，记得在周一到周五准时进入直播间，和大家一起畅聊新消费新科技新趋势。"
+DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
+DEFAULT_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
+DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"
+DEFAULT_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
+
+# Chinese audio examples (alternative)
+# DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
+# DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
+# DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
+# DEFAULT_PROMPT_TEXT_SPEAKER2 = "如果大家想听到更丰富更及时的直播内容，记得在周一到周五准时进入直播间，和大家一起畅聊新消费新科技新趋势。"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -219,7 +225,7 @@ def parse_input_content(input_path):
 
 # =============== Dialogue Script Generation Function ===============
 
-def generate_podcast_script(content):
+def generate_podcast_script(content, language='en'):
     """Call large model to generate podcast dialogue script"""
     from openai import OpenAI
 
@@ -228,10 +234,9 @@ def generate_podcast_script(content):
         base_url=os.getenv("OPENAI_API_BASE", "YOUR_API_BASE_URL"),
     )
 
-    
-    role_play = "两位中文播客主持人"
-    
-    instruction = f"""你是一位专业的中文播客文字脚本撰稿人。现在请你根据提供的有关最新AI及大模型相关进展的原始资料，生成一段模拟{role_play}之间的自然对话脚本。该脚本应符合以下具体要求：
+    if language == 'zh':
+        role_play = "两位中文播客主持人"
+        instruction = f"""你是一位专业的中文播客文字脚本撰稿人。现在请你根据提供的有关最新AI及大模型相关进展的原始资料，生成一段模拟{role_play}之间的自然对话脚本。该脚本应符合以下具体要求：
     一、语言风格
     - 使用较为自然、随意、轻松的日常中文表达；
     - 优先采用简单易懂的词汇，避免书面用语，将书面表达转换为符合口语表达的形式，但不改变专业词汇的内容；
@@ -268,6 +273,46 @@ def generate_podcast_script(content):
 
     请根据以上要求和提供的原始资料，将其转化为符合以上所有要求的播客对话脚本。一定要用[S1]和[S2]标记两位说话人，绝对不能使用任何其它符号标记说话人。
     注意：直接输出结果，不要包含任何额外信息。
+    """
+    else: # Default to English
+        role_play = "two English podcast hosts"
+        instruction = f"""You are a professional English podcast scriptwriter. Based on the provided source material about the latest developments in AI and large models, generate a natural conversational script simulating a dialogue between {role_play}. The script should meet the following specific requirements:
+    I. Language Style
+    - Use natural, casual, and relaxed everyday English expressions.
+    - Prioritize simple and easy-to-understand vocabulary, avoiding formal language. Convert written expressions into spoken language forms without changing the content of professional terms.
+    - Appropriately include internet slang, colloquialisms, and idioms to enhance authenticity.
+    - The dialogue should feel like a conversation between {role_play}.
+
+    II. Sentence Structure
+    - Use loose and natural sentence structures, allowing for spoken features like repetition, pauses, and filler words.
+    - Encourage the use of repetition (e.g., "very, very," "take it slow") and filler words (e.g., "like," "actually," "so," "you know," "uh," etc.).
+    - Appropriately insert vague expressions and slightly emotional tones to enhance approachability.
+
+    III. Dialogue Structure
+    - The two speakers should take turns speaking, marked with [S1] and [S2] for each turn. Do not add a newline between [S1] and [S2].
+    - When one person is speaking, the other can appropriately insert short, natural feedback or connecting phrases (e.g., "Yeah.", "Right.", "Exactly.", "I see.", "Okay.") to show they are listening.
+    - The conversation should have an introduction, a core discussion, and a natural conclusion, with a rhythmic and varied tone, avoiding a flat narrative.
+    - The total length should be controlled to within a 10-minute reading time (no more than 1500 words). Do not exceed the time limit.
+    - **Emphasize active feedback from the listener: When one speaker is explaining a point, the other should frequently interject with short connecting or feedback words (e.g., "Mhm.", "Yeah.", "Right.", "Oh.", "I see.", "Okay.", "Got it.", "Makes sense.", "Totally.") to show active listening, understanding, and engagement. This feedback should be naturally interspersed at pauses or transitions in the speaker's sentences, not as abrupt interruptions. For example: [S2] I'm not a big believer in horoscopes, actually. [S1] Mhm. [S2] At first, like most people who don't believe in them, I thought, uh, you can't just divide people into twelve types, [S1] Right. [S2] and then what it says is just correct. Use this kind of feedback as much as possible; don't be stingy.**
+
+    IV. Punctuation and Formatting
+    - Use only standard English punctuation: commas, periods, question marks.
+    - Do not use exclamation marks. Do not use special symbols like ellipses ('...'), parentheses, quotation marks (including ''""'"), or dashes.
+    - Spell out numbers as words, e.g., "1,000,000" as "one million".
+    - Intelligently determine how to pronounce numbers based on context. Spell out abbreviations with numbers, e.g., "a2b" as "a to b", "gpt-4o" as "GPT four O", "3:4" as "three to four". If "2021" is a year, it should be "twenty twenty-one", but if it's a number, it should be "two thousand twenty-one". Ensure you translate it appropriately based on context, not just as a simple conversion.
+
+    V. Content Requirements
+    - All content must be rewritten based on the source material; do not copy its written expressions. All information from the source material must be mentioned completely, without omissions.
+    - You can add appropriate background explanations, roasts, comparisons, associations, and questions to enhance the rhythm and fun of the dialogue.
+    - Ensure high information density and that citations have complete context so the audience can understand.
+    - Do not output things like "I am S1" or "I am S2" within the dialogue.
+    - If there are technical terms, provide explanations. For abstract technical points, use analogies or metaphors to make them less obscure.
+
+    ## Source Material
+    {content}
+
+    Please convert the provided source material into a podcast dialogue script that meets all the above requirements. Be sure to mark the two speakers with [S1] and [S2], and absolutely do not use any other symbols to mark the speakers.
+    Note: Output the result directly without any extra information.
     """
 
     try:
@@ -314,12 +359,13 @@ def generate_podcast_script(content):
 
 # =============== Main Function ===============
 
-def process_input_to_audio(input_path: str, output_dir: str = "examples"):
+def process_input_to_audio(input_path: str, output_dir: str = "examples", language: str = 'en'):
     """Complete processing pipeline: from input to audio output
     
     Args:
         input_path (str): Input path (URL, PDF or TXT file)
         output_dir (str): Output directory
+        language (str): Language for the podcast script ('en' or 'zh')
     """
     
     # 1. Parse input content
@@ -333,7 +379,7 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples"):
     
     # 2. Use large model to generate dialogue script
     print("\nStep 2: Generate dialogue script")
-    script = generate_podcast_script(content)
+    script = generate_podcast_script(content, language=language)
     if not script:
         print("Dialogue script generation failed, program terminated")
         return
@@ -395,11 +441,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate podcast audio: supports URL, PDF or TXT file input")
     parser.add_argument("input_path", help="Input path: URL address, PDF file path or TXT file path")
     parser.add_argument("-o", "--output", default="outputs", help="Output directory (default: outputs)")
+    parser.add_argument("-l", "--language", default="en", choices=['en', 'zh'], help="Language of the podcast script (en or zh, default: en)")
     
     args = parser.parse_args()
     
     # Use command line arguments
     print(f"Input path: {args.input_path}")
     print(f"Output directory: {args.output}")
+    print(f"Script language: {args.language}")
     
-    process_input_to_audio(args.input_path, args.output)
+    process_input_to_audio(args.input_path, args.output, args.language)
