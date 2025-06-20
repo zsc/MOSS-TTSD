@@ -103,6 +103,24 @@ python podever_demo.py
 
 ## Demos
 
+## Evaluation
+| Model      | Speaker Accuracy (↑) | Corrected Speaker Accuracy (↑) | Speaker Similarity (↑) | WER (↓) | Normalized WER (↓) |
+|------------|----------------------|--------------------------------|-----------------------------|---------|--------------------|
+| Mooncast   | 0.8240               | 0.8426                         | 0.7267                      | 0.5407  | 0.2631             |
+| Asteroid   | 0.7756               | 0.8506                         | 0.7272                      | 0.2836  | 0.2257             |
+
+
+We constructed a test set comprising 240 two-speaker dialogue samples. The Meta's Massively Multilingual Speech Forced Alignment (MMS-FA) model was employed to perform word-level alignment between the input text and the output audio. The output audio was subsequently segmented into sentence-level clips based on punctuation marks, with speaker labels for each segment determined by the input text.
+
+For speaker verification, the wespeaker SimAMResNet100 model was utilized as the speaker embedding extractor. For each audio segment, the cosine similarity of speaker embeddings was computed against the audio samples of the two speakers in the prompt. The predicted speaker for each segment was assigned as the one with the higher similarity score.
+
+The speaker accuracy for each sample was derived by averaging the accuracy across all segments. To account for potential speaker flipping instability during generation, we introduced a corrected speaker accuracy metric. For each sample, the accuracy was calculated twice: once using the original speaker labels and once using the flipped labels. The higher of the two values was taken as the final speaker accuracy for that sample.
+
+The speaker similarity score for each segment was defined as the higher of the two cosine similarity values between the segment and the prompt audio samples of the two speakers. The overall speaker similarity metric for the model was obtained by averaging these values across all segments.
+
+For the Word Error Rate (WER) evaluation, the input text was compared against the ASR-transcribed output of the 240 generated samples. The ASR transcription was performed using the Whisper Large-v3 model. Both the input text and ASR output were normalized by removing all speaker identifiers and punctuation marks. To further mitigate potential ASR-induced errors, the input text and ASR output were converted to pinyin (phonetic transcription), yielding a normalized WER metric.
+
+
 ## License
 
 MOSS-TTSD is released under the Apache 2.0 license.
