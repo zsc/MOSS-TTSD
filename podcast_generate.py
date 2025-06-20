@@ -7,6 +7,7 @@ import re
 from PyPDF2 import PdfReader
 import openai
 from generation_utils import load_model, process_batch
+import argparse
 
 # =============== Configuration Section ===============
 SYSTEM_PROMPT = "You are a speech synthesizer that generates natural, realistic, and human-like conversational audio from dialogue text."
@@ -239,27 +240,27 @@ def generate_podcast_script(content):
 
     二、句式结构
     - 使用松散、自然的句式，允许存在口语特征如重复、停顿、语气词等；
-    - 鼓励使用叠词（如“特别特别”、“慢慢来”）和填充词（如“这个”、“其实”、“然后”、“就是”、“呃”等）；
+    - 鼓励使用叠词（如"特别特别"、"慢慢来"）和填充词（如"这个"、"其实"、"然后"、"就是"、"呃"等）；
     - 可适度插入模糊表达、略带情绪的语调，增强亲和力。
 
     三、对话结构
     - 两个说话人交替发言，并使用[S1]和[S2]标记两位说话人轮次，[S1]和[S2]中间不加入换行；
-    - 每当一方讲话时，另一方可以适当插入自然、简短的反馈或承接语（如“嗯。”“对。”“是的。”“确实。”“原来是这样。”等），展现倾听状态；
+    - 每当一方讲话时，另一方可以适当插入自然、简短的反馈或承接语（如"嗯。""对。""是的。""确实。""原来是这样。"等），展现倾听状态；
     - 对话应有开头引入、核心讨论与自然结尾，语气上有节奏起伏，避免平铺直叙；
     - 总长度控制在10分钟以内的语音朗读时长（不超过1500字），禁止超时。
     - **特别强调听话方的积极反馈：当一位说话人正在讲述或解释某个观点时，另一位说话人应频繁地插入简短的承接或反馈词语（例如：「嗯。」、「是。」、「对。」、「哦。」、「是的。」、「哦，原来是这样。」、「明白。」、「没错。」、「有道理。」、「确实」），以表明其正在积极倾听、理解和互动。这些反馈应自然地穿插在说话者语句的间歇或段落转换处，而不是生硬地打断。例如：[S2]我本人其实不太相信星座诶，[S1]嗯。[S2]在一开始的时候，我就跟大部分不相信星座的一样，觉得，呃，你总能把人就分成十二种，[S1]是的。[S2]然后呢就它讲的就是对的。这种反馈要尽可能多，不要吝啬。**
 
     四、标点与格式
     - 仅使用中文标点：逗号、句号、问号；
-    - 禁止使用叹号。禁止使用省略号（'...'）、括号、引号（包括‘’""'"）或波折号等特殊符号；
-    - 所有数字转换为中文表达，如“1000000”修改为“一百万”；
-    - 请根据上下文，智慧地判断数字的读音，所有带数字的英文缩写要意译，如“a2b”输出为“a到b”、“gpt-4o”输出为“GPT四O”、“3:4”输出为“3比4”，“2021”如果表达年份，应当转换为“二零二一”，但如果表示数字，应当转换为“两千零二十一”。请保证不要简单转换为中文数字，而是根据上下文，将其翻译成合适的中文。
+    - 禁止使用叹号。禁止使用省略号（'...'）、括号、引号（包括''""'"）或波折号等特殊符号；
+    - 所有数字转换为中文表达，如"1000000"修改为"一百万"；
+    - 请根据上下文，智慧地判断数字的读音，所有带数字的英文缩写要意译，如"a2b"输出为"a到b"、"gpt-4o"输出为"GPT四O"、"3:4"输出为"3比4"，"2021"如果表达年份，应当转换为"二零二一"，但如果表示数字，应当转换为"两千零二十一"。请保证不要简单转换为中文数字，而是根据上下文，将其翻译成合适的中文。
 
     五、内容要求
     - 所有内容都基于原始资料改写，不得照搬其书面表达，原始资料中所有的内容都要完整的提到，不能丢失或者省略信息；
     - 可加入适当的背景说明、吐槽、对比、联想、提问等方式，增强对话的节奏和趣味性；
     - 确保信息密度较高，引用需确保上下文完整，确保听众能理解；
-    - 在对话内不要输出“我是谁”，“我是S1”，“我是S2”等相关内容；
+    - 在对话内不要输出"我是谁"，"我是S1"，"我是S2"等相关内容；
     - 如有专业术语则需要提供解释的解释，如果涉及抽象技术点，可以使用比喻类比等方式解释，避免听起来晦涩难懂。
 
     ## 原始资料
@@ -390,13 +391,15 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples"):
 # =============== Usage Examples ===============
 
 if __name__ == "__main__":
-    # Usage examples:
+    # Add command line argument parsing
+    parser = argparse.ArgumentParser(description="Generate podcast audio: supports URL, PDF or TXT file input")
+    parser.add_argument("input_path", help="Input path: URL address, PDF file path or TXT file path")
+    parser.add_argument("-o", "--output", default="outputs", help="Output directory (default: outputs)")
     
-    # 1. Process web URL
-    # process_input_to_audio("https://www.open-moss.com/cn/speechgpt2-preview/")
+    args = parser.parse_args()
     
-    # 2. Process PDF file
-    process_input_to_audio("examples/Attention Is All You Need.pdf")
+    # Use command line arguments
+    print(f"Input path: {args.input_path}")
+    print(f"Output directory: {args.output}")
     
-    # 3. Process TXT file
-    # process_input_to_audio("example.txt")
+    process_input_to_audio(args.input_path, args.output)

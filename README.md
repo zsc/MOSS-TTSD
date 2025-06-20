@@ -128,7 +128,17 @@ Before using the podcast generation tool, please ensure that environment variabl
 export OPENAI_API_KEY="your_openai_api_key"
 export OPENAI_API_BASE="your_openai_api_base"
 
-python podcast_generate.py
+# Process web article
+python podcast_generate.py "https://www.example.com/article"
+
+# Process PDF file  
+python podcast_generate.py "examples/Attention Is All You Need.pdf"
+
+# Process text file
+python podcast_generate.py "your_article.txt"
+
+# Custom output directory
+python podcast_generate.py "your_input" -o "your_output"
 ```
 
 ## Demos
