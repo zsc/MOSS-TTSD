@@ -129,7 +129,7 @@ export OPENAI_API_KEY="your_openai_api_key"
 export OPENAI_API_BASE="your_openai_api_base"
 
 # Process web article
-python podcast_generate.py "https://www.example.com/article"
+python podcast_generate.py "https://www.open-moss.com/cn/moss-ttsd/"
 
 # Process PDF file  
 python podcast_generate.py "examples/Attention Is All You Need.pdf"
@@ -140,11 +140,11 @@ python podcast_generate.py "examples/example.txt"
 # Custom output directory
 python podcast_generate.py "your_input" -o "your_output"
 
-# Generate a podcast in Chinese
-python podcast_generate.py "your_input" -l zh
+# Generate a podcast in English
+python podcast_generate.py "your_input" -l en
 ```
 
-The tool supports generating scripts in both English (`en`) and Chinese (`zh`), defaulting to English. You can use the `--language` or `-l` flag to specify the language.
+The tool supports generating scripts in both English (`en`) and Chinese (`zh`), defaulting to Chinese. You can use the `--language` or `-l` flag to specify the language.
 
 
 ## Demos
