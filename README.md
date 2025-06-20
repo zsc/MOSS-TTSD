@@ -6,11 +6,11 @@
     <img src="asset/OpenMOSS_logo.png" alt="OpenMOSS Logo" width="300">
     <p>
     </p>
-    <a href="https://blog.example.com"><img src="https://img.shields.io/badge/Blog-Read%20More-green" alt="blog"></a>
-    <a href="#"><img src="https://img.shields.io/badge/Paper-Coming%20Soon-orange" alt="paper"></a>
+    <a href="https://www.open-moss.com/en/moss-ttsd/"><img src="https://img.shields.io/badge/Blog-Read%20More-green" alt="blog"></a>
+    <a href="https://www.open-moss.com/en/moss-ttsd/"><img src="https://img.shields.io/badge/Paper-Coming%20Soon-orange" alt="paper"></a>
     <a href="https://huggingface.co/fnlp/MOSS-TTSD-v0"><img src="https://img.shields.io/badge/Hugging%20Face-Model%20Page-yellow" alt="Hugging Face"></a>
-    <a href="https://github.com/"><img src="https://img.shields.io/badge/Python-3.12+-orange" alt="version"></a>
-    <a href="https://github.com/OpenMOSS/MOSS-TTSD"><img src="https://img.shields.io/badge/PyTorch-2.5+-brightgreen" alt="python"></a>
+    <a href="https://github.com/"><img src="https://img.shields.io/badge/Python-3.10+-orange" alt="version"></a>
+    <a href="https://github.com/OpenMOSS/MOSS-TTSD"><img src="https://img.shields.io/badge/PyTorch-2.0+-brightgreen" alt="python"></a>
     <a href="https://github.com/OpenMOSS/MOSS-TTSD"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="mit"></a>
 </div>
 
@@ -21,14 +21,15 @@
 
 MOSS-TTSD (text to spoken dialogue) is an open-source bilingual spoken dialogue synthesis model that supports both Chinese and English.
 It can transform dialogue scripts between two speakers into natural, expressive conversational speech.
-MOSS-TTSD supports voice cloning and single-session speech generation of up to 960 seconds, making it ideal for AI podcast production.
+MOSS-TTSD supports voice cloning and long single-session speech generation, making it ideal for AI podcast production.
+ For detailed information about the model and demos, please refer to our [Blog-en](https://www.open-moss.com/en/moss-ttsd/) and [中文博客](https://www.open-moss.com/cn/moss-ttsd/).
 
 ## Highlights
 
 - **Highly Expressive Dialogue Speech**: Built on unified semantic-acoustic neural audio codec, a pre-trained large language model, millions of hours of TTS data, and 400k hours synthetic and real conversational speech, MOSS-TTSD generates highly expressive, human-like dialogue speech with natural conversational prosody.
 - **Two-Speaker Voice Cloning**: MOSS-TTSD supports zero-shot two speakers voice cloning and can generate conversational speech with accurate speaker swithcing based on dialogue scripts.
 - **Chinese-English Bilingual Support**: MOSS-TTSD enables highly expressive speech generation in both Chinese and English.
-- **Long-Form Speech Generation (up to 960 seconds)**: Thanks to low-bitrate codec and training framework optimization, MOSS-TTSD has been trained for long speech generation, enabling single-session speech generation of up to 960 seconds.
+- **Long-Form Speech Generation**: Thanks to low-bitrate codec and training framework optimization, MOSS-TTSD has been trained for long speech generation.
 - **Fully Open Source & Commercial-Ready**: MOSS-TTSD and its future updates will be fully open-source and support free commercial use.
 
 
@@ -123,6 +124,8 @@ Powered by siliconflow. Stay tuned!
 We provide a podcast generation tool that directly analyzes either a URL or a user-uploaded PDF file, extracting content to generate a high-quality podcast segment.
 
 Before using the podcast generation tool, please ensure that environment variables `OPENAI_API_KEY` and `OPENAI_API_BASE` are set correctly.
+We use Gemini API to generate the podcast script.
+So the API key should be set to the Gemini API key and the API base should be set to "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 ```bash
 export OPENAI_API_KEY="your_openai_api_key"
@@ -148,161 +151,13 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 
 
 ## Demos
-### Dialogue generation
 
-<table>
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>prompt1</th>
-      <th>prompt2</th>
-      <th>Mooncast</th>
-      <th>MOSS-TTSD-v0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Context Learning Discussion(ZH)</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_1.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_2.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/others/demo1_mooncast.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/demo1_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Game Discussion(ZH)</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_3.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_zh_4.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/others/demo2_mooncast.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/demo2_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Asteroid TTS Talk</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_1.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_2.mp3"></audio></td>
-      <td><audio src="./asset/demo_audio/others/demo3_mooncast.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/demo3_mossttsd.mp3"></audio></td>
-    </tr>
-  </tbody>
-</table>
+See our blog for more demos at https://www.open-moss.com/en/moss-ttsd/
 
-### Voice Clone
+## Limitations
 
-<table>
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>prompt1</th>
-      <th>prompt2</th>
-      <th>Mooncast</th>
-      <th>MOSS-TTSD-v0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Jia Ling and Liu Dehua(ZH)</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/jl.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/ldh.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone1_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Pan Changjiang and Gazi(ZH)</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/pcj.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/gz.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone2_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>G.E.M. and Jay(ZH)</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/dzq.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/jay.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone3_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Elon Musk and Jensen Huang</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/Elon Musk.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/Jensen.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone4_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Trump and Obama</strong></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/Trump.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/prompt_audio/Obama.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/voiceclone5_mossttsd.mp3"></audio></td>
-    </tr>
-  </tbody>
-</table>
-
-### Sound Event
-
-<table>
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>text</th>
-      <th>MOSS-TTSD-v0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Cough(ZH)</strong></td>
-      <td>[S1] 今晚你来吗？<br>[S2] (咳)估计去不了，人有点不舒服。<br>[S1] 啊这样啊，那你好好休息。<br>[S2] 没事儿，你们玩开心点。</td>
-      <td><audio controls src="./asset/demo_audio/soundevent1_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><strong>Laugh(ZH)</strong></td>
-      <td>[S1] 哎你看见刚才那人的帽子没？<br>[S2] (笑)看见了！上头居然有个螺旋桨！<br>[S1]我真是服了，怎么会有人戴那种帽子。</td>
-      <td><audio controls src="./asset/demo_audio/soundevent2_mossttsd.mp3"></audio></td>
-    </tr>
-  </tbody>
-</table>
-
-### Podcast generation
-
-<table>
-  <thead>
-    <tr>
-      <th>Doubao podcast(ZH)</th>
-      <th>MOSS-TTSD-v0(ZH)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><audio controls src="./asset/demo_audio/others/podcast1_doubao.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/podcast1_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><audio controls src="./asset/demo_audio/others/podcast2_doubao.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/podcast2_mossttsd.mp3"></audio></td>
-    </tr>
-    <tr>
-      <td><audio controls src="./asset/demo_audio/others/podcast3_doubao.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/podcast3_mossttsd.mp3"></audio></td>
-    </tr>
-  </tbody>
-</table>
-
-
-## Evaluation
-| Model      | Speaker Accuracy (↑) | Corrected Speaker Accuracy (↑) | Speaker Similarity (↑) | WER (↓) | Normalized WER (↓) |
-|------------|----------------------|--------------------------------|-----------------------------|---------|--------------------|
-| Asteroid   | 0.7756               | 0.8506                         | 0.7272                      | 0.2836  | 0.2257             |
-| Mooncast   | 0.8240               | 0.8426                         | 0.7267                      | 0.5407  | 0.2631             |
-
-
-We constructed a test set comprising 240 two-speaker dialogue samples. The Meta's Massively Multilingual Speech Forced Alignment (MMS-FA) model was employed to perform word-level alignment between the input text and the output audio. The output audio was subsequently segmented into sentence-level clips based on punctuation marks, with speaker labels for each segment determined by the input text.
-
-For speaker verification, the wespeaker SimAMResNet100 model was utilized as the speaker embedding extractor. For each audio segment, the cosine similarity of speaker embeddings was computed against the audio samples of the two speakers in the prompt. The predicted speaker for each segment was assigned as the one with the higher similarity score.
-
-The speaker accuracy for each sample was derived by averaging the accuracy across all segments. To account for potential speaker flipping instability during generation, we introduced a corrected speaker accuracy metric. For each sample, the accuracy was calculated twice: once using the original speaker labels and once using the flipped labels. The higher of the two values was taken as the final speaker accuracy for that sample.
-
-The speaker similarity score for each segment was defined as the higher of the two cosine similarity values between the segment and the prompt audio samples of the two speakers. The overall speaker similarity metric for the model was obtained by averaging these values across all segments.
-
-For the Word Error Rate (WER) evaluation, the input text was compared against the ASR-transcribed output of the 240 generated samples. The ASR transcription was performed using the Whisper Large-v3 model. Both the input text and ASR output were normalized by removing all speaker identifiers and punctuation marks. To further mitigate potential ASR-induced errors, the input text and ASR output were converted to pinyin (phonetic transcription), yielding a normalized WER metric.
-
+Currently, our model still exhibits instances of instability, such as speaker switching errors and timbre cloning deviations.
+We will further optimize the model for stability in subsequent versions.
 
 ## License
 
