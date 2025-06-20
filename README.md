@@ -65,7 +65,7 @@ wget https://huggingface.co/fnlp/XY_Tokenizer_TTSD_V0/resolve/main/xy_tokenizer.
 To run MOSS-TTSD locally, you can use the provided inference script. Make sure you have the model checkpoint and configuration files ready.
 
 ```bash
-python inference.py --jsonl examples/examples.jsonl --output_dir output --seed 42 --use_normalize
+python inference.py --jsonl examples/examples.jsonl --output_dir outputs --seed 42 --use_normalize
 ```
 
 Parameters:

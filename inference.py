@@ -19,8 +19,8 @@ def main():
                        help="Path to JSONL file (default: examples/examples.jsonl)")
     parser.add_argument("--seed", type=int, default=42,
                        help="Random seed for reproducibility (default: 42)")
-    parser.add_argument("--output_dir", default="examples",
-                       help="Output directory for generated audio files (default: examples)")
+    parser.add_argument("--output_dir", default="outputs",
+                       help="Output directory for generated audio files (default: outputs)")
     parser.add_argument("--use_normalize", action="store_true", default=True,
                        help="Whether to use text normalization (default: True)")
     
