@@ -1,10 +1,7 @@
 <div align="center">
     <h1>
-    MOSS-TTSD
+    MOSS: Text to Spoken Dialogue Generation
     </h1>
-    <p>
-    <b><em>Text to Spoken Dialogue Generation</em></b>
-    </p>
     <p>
     <img src="asset/OpenMOSS_logo.png" alt="OpenMOSS Logo" width="300">
     <p>
