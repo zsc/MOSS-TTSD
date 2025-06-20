@@ -38,13 +38,51 @@ MOSS-TTSD supports voice cloning and single-session speech generation of up to 9
 
 ## Installation
 
+To run MOSS-TTSD, you need to install the required dependencies. You can use either pip or conda to set up your environment.
+
+### Using conda
+
+```bash
+conda create -n moss_ttsd python=3.10 -y && conda activate moss_ttsd
+pip install -r requirements.txt
+```
+
+### Download XY Tokenizer
+
+<!-- https://huggingface.co/fnlp/XY_Tokenizer_TTSD_V0/resolve/main/xy_tokenizer.ckpt 下载到 Asteroid-gradio/XY_Tokenizer/weights -->
+
+You also need to download the XY Tokenizer model weights. You can find the weights in the [XY_Tokenizer repository](https://huggingface.co/fnlp/XY_Tokenizer_TTSD_V0).
+
+```bash
+mkdir -p XY_Tokenizer/weights
+wget https://huggingface.co/fnlp/XY_Tokenizer_TTSD_V0/resolve/main/xy_tokenizer.ckpt -O XY_Tokenizer/weights/xy_tokenizer.ckpt
+```
+
 ## Usage
 
 ### Local Inference
 
+To run MOSS-TTSD locally, you can use the provided inference script. Make sure you have the model checkpoint and configuration files ready.
+
+```bash
+python inference.py --jsonl examples/examples.jsonl --output_dir output --seed 42 --use_normalize
+```
+
+Parameters:
+- `--jsonl`: Path to the input JSONL file containing dialogue scripts and speaker prompts.
+- `--output_dir`: Directory where the generated audio files will be saved.
+- `--seed`: Random seed for reproducibility.
+- `--use_normalize`: Whether to normalize the text input (default is `True`).
+
 **GPU Requirements**
 
 ### Web UI Usage
+
+You can run the MOSS-TTSD web UI locally using Gradio. Run the following command to start the Gradio demo:
+
+```bash
+python gradio_demo.py
+```
 
 ### API Usage
 
@@ -53,6 +91,15 @@ Powered by siliconflow. Stay tuned!
 ### Podcast Generation
 
 We provide a podcast generation tool that directly analyzes either a URL or a user-uploaded PDF file, extracting content to generate a high-quality podcast segment.
+
+Before using the podcast generation tool, please ensure that environment variables `OPENAI_API_KEY` and `OPENAI_API_BASE` are set correctly.
+
+```bash
+export OPENAI_API_KEY="your_openai_api_key"
+export OPENAI_API_BASE="your_openai_api_base"
+
+python podever_demo.py
+```
 
 ## Demos
 
