@@ -179,7 +179,7 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
       <td><strong>Asteroid TTS Talk</strong></td>
       <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_1.mp3"></audio></td>
       <td><audio controls src="./asset/demo_audio/prompt_audio/prompt_en_2.mp3"></audio></td>
-      <td><audio controls src="./asset/demo_audio/others/demo3_mooncast.mp3"></audio></td>
+      <td><audio src="./asset/demo_audio/others/demo3_mooncast.mp3"></audio></td>
       <td><audio controls src="./asset/demo_audio/demo3_mossttsd.mp3"></audio></td>
     </tr>
   </tbody>
