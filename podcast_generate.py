@@ -99,105 +99,35 @@ def extract_web_content(url):
 
         print(f"Extracted title: {title}")
 
-        # Locate main article content - enhanced strategy
-        content_div = None
-        text_content = ""
-
-        # Strategy 1: Look for article tags
-        articles = soup.find_all('article')
-        if articles:
-            content_div = max(articles, key=lambda x: len(x.get_text()))
-            print("Found content using <article> tags")
-
-        # Strategy 2: Look for main content containers
-        if not content_div:
-            possible_selectors = [
-                '[role="main"]',
-                '.article-body',
-                '.post-content',
-                '.entry-content',
-                '.article-content',
-                '.content-body',
-                '.story-body',
-                '.article-text',
-                'main'
-            ]
+        # Simply extract all text from the page
+        # Remove script, style, and other non-content elements
+        for unwanted in soup.find_all(['script', 'style', 'noscript']):
+            unwanted.decompose()
             
-            for selector in possible_selectors:
-                elements = soup.select(selector)
-                if elements:
-                    content_div = max(elements, key=lambda x: len(x.get_text()))
-                    print(f"Found content using selector: {selector}")
-                    break
-
-        # Strategy 3: Look for divs with content-related classes
-        if not content_div:
-            possible_content_divs = soup.find_all('div', class_=lambda c: c and any(
-                keyword in c.lower() for keyword in ['content', 'article', 'post', 'body', 'text', 'story']
-            ))
-            if possible_content_divs:
-                content_div = max(possible_content_divs, key=lambda x: len(x.get_text()))
-                print("Found content using content-related class names")
-
-        # Strategy 4: Find the section with most paragraphs
-        if not content_div:
-            all_divs = soup.find_all('div')
-            if all_divs:
-                # Find div with most paragraph content
-                best_div = None
-                max_p_length = 0
-                for div in all_divs:
-                    p_text = ' '.join([p.get_text() for p in div.find_all('p')])
-                    if len(p_text) > max_p_length:
-                        max_p_length = len(p_text)
-                        best_div = div
-                
-                if best_div and max_p_length > 200:  # At least 200 characters
-                    content_div = best_div
-                    print("Found content using paragraph density analysis")
-
-        # Strategy 5: Fallback - collect all paragraphs
-        if not content_div:
-            paragraphs = soup.find_all('p')
-            if paragraphs:
-                # Filter paragraphs with substantial content
-                substantial_paragraphs = [p for p in paragraphs if len(p.get_text().strip()) > 50]
-                if substantial_paragraphs:
-                    # Create a virtual container with all substantial paragraphs
-                    text_content = '\n\n'.join([p.get_text().strip() for p in substantial_paragraphs])
-                    print(f"Found content using paragraph collection: {len(substantial_paragraphs)} paragraphs")
-
-        # Extract content from found container
-        if content_div and not text_content:
-            # Remove unwanted elements
-            for unwanted in content_div.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
-                unwanted.decompose()
-
-            # Get cleaned text
-            text_content = content_div.get_text(separator='\n', strip=True)
-
-        # Final fallback: get all text from body
-        if not text_content:
-            body = soup.find('body')
-            if body:
-                for unwanted in body.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe']):
-                    unwanted.decompose()
-                text_content = body.get_text(separator='\n', strip=True)
-                print("Using fallback: extracted all body text")
-
-        # Clean text
+        # Get all text content
+        text_content = soup.get_text(separator='\n', strip=True)
+        
+        # Clean the text
         if text_content:
             # Remove extra blank lines
             cleaned_text = re.sub(r'\n{3,}', '\n\n', text_content)
             # Remove extra spaces
             cleaned_text = re.sub(r' {2,}', ' ', cleaned_text)
-            # Remove very short lines (likely navigation or metadata)
+            # Remove very short lines and common noise
             lines = cleaned_text.split('\n')
-            filtered_lines = [line.strip() for line in lines if len(line.strip()) > 10]
+            filtered_lines = []
+            for line in lines:
+                line = line.strip()
+                # Filter out very short lines and common non-content patterns
+                if (len(line) > 3 and 
+                    'browser does not support' not in line.lower() and
+                    not re.match(r'^[0-9\s\-\/\.]+$', line)):  # Filter date-only lines
+                    filtered_lines.append(line)
+            
             cleaned_text = '\n'.join(filtered_lines)
             
             print(f"Final content length: {len(cleaned_text)} characters")
-            print(f"Content preview: {cleaned_text[:200]}...")
+            print(f"Content preview: {cleaned_text[:300]}...")
             
             return title, cleaned_text
         else:
