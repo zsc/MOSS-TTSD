@@ -17,16 +17,16 @@ SPT_CHECKPOINT_PATH = "XY_Tokenizer/weights/xy_tokenizer.ckpt"
 MAX_CHANNELS = 8
 
 # Default audio file paths (default audio provided by user)
-DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
-DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
+# DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
+# DEFAULT_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
+# DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"  
+# DEFAULT_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
 
 # Chinese audio examples (alternative)
-# DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
-# DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
-# DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
-# DEFAULT_PROMPT_TEXT_SPEAKER2 = "如果大家想听到更丰富更及时的直播内容，记得在周一到周五准时进入直播间，和大家一起畅聊新消费新科技新趋势。"
+DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
+DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
+DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
+DEFAULT_PROMPT_TEXT_SPEAKER2 = "如果大家想听到更丰富更及时的直播内容，记得在周一到周五准时进入直播间，和大家一起畅聊新消费新科技新趋势。"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -291,7 +291,7 @@ def parse_input_content(input_path):
 
 # =============== Dialogue Script Generation Function ===============
 
-def generate_podcast_script(content, language='en'):
+def generate_podcast_script(content, language='zh'):
     """Call large model to generate podcast dialogue script"""
     from openai import OpenAI
 
@@ -425,7 +425,7 @@ def generate_podcast_script(content, language='en'):
 
 # =============== Main Function ===============
 
-def process_input_to_audio(input_path: str, output_dir: str = "examples", language: str = 'en'):
+def process_input_to_audio(input_path: str, output_dir: str = "examples", language: str = 'zh'):
     """Complete processing pipeline: from input to audio output
     
     Args:
@@ -507,7 +507,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate podcast audio: supports URL, PDF or TXT file input")
     parser.add_argument("input_path", help="Input path: URL address, PDF file path or TXT file path")
     parser.add_argument("-o", "--output", default="outputs", help="Output directory (default: outputs)")
-    parser.add_argument("-l", "--language", default="en", choices=['en', 'zh'], help="Language of the podcast script (en or zh, default: en)")
+    parser.add_argument("-l", "--language", default="zh", choices=['en', 'zh'], help="Language of the podcast script (en or zh, default: zh)")
     
     args = parser.parse_args()
     
