@@ -26,7 +26,7 @@ EN_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with h
 ZH_PROMPT_AUDIO_SPEAKER1 = "examples/pod_f_enhanced.wav"
 ZH_PROMPT_TEXT_SPEAKER1 = "然后呢，现在的社会现实就是，我们作为寿命更长的群体，我们的收入更少，这个是我们必须要面对的一个基本的事实。女性的平均寿命通常是比男性要长几年，但是与此同时，女性的收入却往往比男性低。"
 ZH_PROMPT_AUDIO_SPEAKER2 = "examples/pod_m_enhanced.wav"
-ZH_PROMPT_TEXT_SPEAKER2 = "下面这个故事啊，里边没有灵异，但是是我最喜欢的那种故事，就是如果你在听这个故事的时候，尤其是故事高潮时候那​​一句话，你如果能在脑海里形成一个画面，那么可能今晚啊，你就指着这个画面熬夜了。"
+ZH_PROMPT_TEXT_SPEAKER2 = "就现在的影片结尾是这个凯瑟琳和杰西卡一番折腾以后呢，那个网红的摄像机碎了，然后两个人要消失了，然后杰西卡说这下大家都要消失挺高兴了吧。"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
