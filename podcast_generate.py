@@ -16,17 +16,17 @@ SPT_CONFIG_PATH = "XY_Tokenizer/config/xy_tokenizer_config.yaml"
 SPT_CHECKPOINT_PATH = "XY_Tokenizer/weights/xy_tokenizer.ckpt"
 MAX_CHANNELS = 8
 
-# Default audio file paths (default audio provided by user)
-# DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
-# DEFAULT_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
-# DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"  
-# DEFAULT_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
+# English audio examples
+EN_PROMPT_AUDIO_SPEAKER1 = "examples/m1.wav"
+EN_PROMPT_TEXT_SPEAKER1 = "How much do you know about her?"
+EN_PROMPT_AUDIO_SPEAKER2 = "examples/m2.wav"  
+EN_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with her constantly since the first day you met her. And we followed you while you went dining, dancing, and sailing. And last night, I happened to be there when you were having dinner with her at Le Petit Tableau."
 
-# Chinese audio examples (alternative)
-DEFAULT_PROMPT_AUDIO_SPEAKER1 = "examples/zh_spk1_moon.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER1 = "周一到周五，每天早晨七点半到九点半的直播片段。言下之意呢，就是废话有点多，大家也别嫌弃，因为这都是直播间最真实的状态了。"
-DEFAULT_PROMPT_AUDIO_SPEAKER2 = "examples/zh_spk2_moon.wav"
-DEFAULT_PROMPT_TEXT_SPEAKER2 = "如果大家想听到更丰富更及时的直播内容，记得在周一到周五准时进入直播间，和大家一起畅聊新消费新科技新趋势。"
+# Chinese audio examples
+ZH_PROMPT_AUDIO_SPEAKER1 = "examples/pod_f_enhanced.wav"
+ZH_PROMPT_TEXT_SPEAKER1 = "然后呢，现在的社会现实就是，我们作为寿命更长的群体，我们的收入更少，这个是我们必须要面对的一个基本的事实。女性的平均寿命通常是比男性要长几年，但是与此同时，女性的收入却往往比男性低。"
+ZH_PROMPT_AUDIO_SPEAKER2 = "examples/pod_m_enhanced.wav"
+ZH_PROMPT_TEXT_SPEAKER2 = "下面这个故事啊，里边没有灵异，但是是我最喜欢的那种故事，就是如果你在听这个故事的时候，尤其是故事高潮时候那​​一句话，你如果能在脑海里形成一个画面，那么可能今晚啊，你就指着这个画面熬夜了。"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -364,6 +364,22 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples", langua
         language (str): Language for the podcast script ('en' or 'zh')
     """
     
+    # Select prompts based on language
+    if language == 'zh':
+        prompt_audio_speaker1 = ZH_PROMPT_AUDIO_SPEAKER1
+        prompt_text_speaker1 = ZH_PROMPT_TEXT_SPEAKER1
+        prompt_audio_speaker2 = ZH_PROMPT_AUDIO_SPEAKER2
+        prompt_text_speaker2 = ZH_PROMPT_TEXT_SPEAKER2
+    else:  # Default to English
+        prompt_audio_speaker1 = EN_PROMPT_AUDIO_SPEAKER1
+        prompt_text_speaker1 = EN_PROMPT_TEXT_SPEAKER1
+        prompt_audio_speaker2 = EN_PROMPT_AUDIO_SPEAKER2
+        prompt_text_speaker2 = EN_PROMPT_TEXT_SPEAKER2
+    
+    print(f"Using {language} prompts:")
+    print(f"Speaker 1: {prompt_audio_speaker1}")
+    print(f"Speaker 2: {prompt_audio_speaker2}")
+    
     # 1. Parse input content
     print("Step 1: Parse input content")
     content = parse_input_content(input_path)
@@ -387,15 +403,15 @@ def process_input_to_audio(input_path: str, output_dir: str = "examples", langua
     model = model.to(device)
     print("TTS model loading completed")
     
-    # 4. Prepare TTS input data
+    # 4. Prepare TTS input data with language-specific prompts
     print("\nStep 4: Prepare TTS input data")
     items = [{
         "text": script,
         "base_path": "",
-        "prompt_audio_speaker1": DEFAULT_PROMPT_AUDIO_SPEAKER1,
-        "prompt_text_speaker1": DEFAULT_PROMPT_TEXT_SPEAKER1,
-        "prompt_audio_speaker2": DEFAULT_PROMPT_AUDIO_SPEAKER2,
-        "prompt_text_speaker2": DEFAULT_PROMPT_TEXT_SPEAKER2
+        "prompt_audio_speaker1": prompt_audio_speaker1,
+        "prompt_text_speaker1": prompt_text_speaker1,
+        "prompt_audio_speaker2": prompt_audio_speaker2,
+        "prompt_text_speaker2": prompt_text_speaker2
     }]
     
     # 5. Set random seed
