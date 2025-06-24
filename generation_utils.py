@@ -285,6 +285,9 @@ def normalize_text(text: str) -> str:
         # Handle consecutive "哈" characters: replace 2 or more with "(笑)"
         content = re.sub(r'哈{2,}', '(笑)', content)
 
+        # Handle English laughter (e.g., "haha", "ha ha")
+        content = re.sub(r'\b(ha(\s*ha)+)\b', '(laughs)', content, flags=re.IGNORECASE)
+
         # First handle multi-character punctuation marks
         content = content.replace('——', '，')
         content = content.replace('……', '，')
