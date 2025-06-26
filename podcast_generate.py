@@ -24,9 +24,9 @@ EN_PROMPT_TEXT_SPEAKER2 = "Well, we know this much about her. You've been with h
 
 # Chinese audio examples
 ZH_PROMPT_AUDIO_SPEAKER1 = "examples/pod_f_enhanced.wav"
-ZH_PROMPT_TEXT_SPEAKER1 = "然后呢，现在的社会现实就是，我们作为寿命更长的群体，我们的收入更少，这个是我们必须要面对的一个基本的事实。女性的平均寿命通常是比男性要长几年，但是与此同时，女性的收入却往往比男性低。"
+ZH_PROMPT_TEXT_SPEAKER1 = "但是因为我上学的时候学的是金融学专业嘛，所以确实可能就看起来这个领域跨度还是比较大的。那如果说回我当时的情况的话呢，当时在毕业季的话，大家肯定都会争取拿到更多的offer嘛。"
 ZH_PROMPT_AUDIO_SPEAKER2 = "examples/pod_m_enhanced.wav"
-ZH_PROMPT_TEXT_SPEAKER2 = "就现在的影片结尾是这个凯瑟琳和杰西卡一番折腾以后呢，那个网红的摄像机碎了，然后两个人要消失了，然后杰西卡说这下大家都要消失挺高兴了吧。"
+ZH_PROMPT_TEXT_SPEAKER2 = "92年回到中国之后跟复旦去建了精算学院，现在跟很多学院学校也有在合作，就是这是最早在国内去做精算的。现在精算也是有中精，就中国精算师体系，还有北美精算师，这个是提的比较多的，也可能是业界含金量最高的吧。"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
