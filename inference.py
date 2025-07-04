@@ -7,7 +7,7 @@ import os
 
 from generation_utils import load_model, process_batch
 
-MODEL_PATH = "fnlp/MOSS-TTSD-v0"
+MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"
 SYSTEM_PROMPT = "You are a speech synthesizer that generates natural, realistic, and human-like conversational audio from dialogue text."
 SPT_CONFIG_PATH = "XY_Tokenizer/config/xy_tokenizer_config.yaml"
 SPT_CHECKPOINT_PATH = "XY_Tokenizer/weights/xy_tokenizer.ckpt"

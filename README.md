@@ -36,6 +36,8 @@ MOSS-TTSD supports voice cloning and long single-session speech generation, maki
 
 ## News 🚀
 
+- **[2025-07-04]** MOSS-TTSD v0.5 is released!
+
 - **[2025-06-20]** MOSS-TTSD v0 is released!
 
 ## Installation

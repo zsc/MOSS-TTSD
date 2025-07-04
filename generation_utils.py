@@ -10,7 +10,7 @@ from modeling_asteroid import AsteroidTTSInstruct
 from XY_Tokenizer.xy_tokenizer.model import XY_Tokenizer
 
 MAX_CHANNELS = 8
-SILENCE_DURATION = 5.0  # Fixed silence duration: 5 seconds
+SILENCE_DURATION = 0.0  # Fixed silence duration: 0 seconds
 
 def load_model(model_path, spt_config_path, spt_checkpoint_path):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -191,7 +191,7 @@ def process_inputs(tokenizer, spt, prompt, text, device, audio_data=None, max_ch
                 
             # similar to DAC encoding adjustment
             audio_token[:, 0] = audio_token[:, 0] + 151665  # Keep this line if offset is needed, otherwise delete
-            input_ids = np.concatenate([input_ids, audio_token])[:-60]
+            input_ids = np.concatenate([input_ids, audio_token])
         except Exception as e:
             print(f"Error processing audio data: {e}")
             raise
@@ -307,7 +307,7 @@ def normalize_text(text: str) -> str:
 
         normalized_lines.append(f"{tag}{content}".strip())
 
-    return "".join(normalized_lines)
+    return "".join(normalized_lines).replace('‘', "'").replace('’', "'")
 
 
 def process_batch(batch_items, tokenizer, model, spt, device, system_prompt, start_idx, use_normalize=False):
