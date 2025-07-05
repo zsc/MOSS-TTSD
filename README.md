@@ -99,6 +99,23 @@ Field descriptions:
 - `prompt_audio_speaker1/2`: Path to reference audio files for voice cloning (relative to `base_path`)
 - `prompt_text_speaker1/2`: Reference text corresponding to the audio prompts for better voice matching
 
+In addition to the JSONL format above, the system also supports using a single JSON object where both speakers share the same reference audio file:
+
+```json
+{
+  "base_path": "/path/to/audio/files",
+  "text": "[S1]Speaker 1 dialogue content[S2]Speaker 2 dialogue content[S1]...",
+  "prompt_audio": "path/to/shared_reference_audio.wav",
+  "prompt_text": "[S1]Reference text for speaker 1[S2]Reference text for speaker 2"
+}
+```
+Field descriptions:
+- `base_path`: Base directory path for audio files
+- `text`: Dialogue script with speaker tags `[S1]` and `[S2]` indicating speaker turns
+- `prompt_audio`: Path to shared reference audio file containing both speakers' voices (relative to `base_path`)
+- `prompt_text`: Reference text corresponding to the audio, also using `[S1]` and `[S2]` tags to distinguish speakers
+
+
 The dialogue text uses speaker tags to indicate turns:
 - `[S1]`: Indicates Speaker 1 is speaking
 - `[S2]`: Indicates Speaker 2 is speaking
