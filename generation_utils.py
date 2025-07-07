@@ -12,10 +12,10 @@ from XY_Tokenizer.xy_tokenizer.model import XY_Tokenizer
 MAX_CHANNELS = 8
 SILENCE_DURATION = 0.0  # Fixed silence duration: 0 seconds
 
-def load_model(model_path, spt_config_path, spt_checkpoint_path):
+def load_model(model_path, spt_config_path, spt_checkpoint_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2"):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     
-    model = AsteroidTTSInstruct.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+    model = AsteroidTTSInstruct.from_pretrained(model_path, torch_dtype=torch_dtype, attn_implementation=attn_implementation)
 
     spt = XY_Tokenizer.load_from_checkpoint(config_path=spt_config_path, ckpt_path=spt_checkpoint_path)
     

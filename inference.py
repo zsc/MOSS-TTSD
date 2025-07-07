@@ -23,18 +23,33 @@ def main():
                        help="Output directory for generated audio files (default: outputs)")
     parser.add_argument("--use_normalize", action="store_true", default=True,
                        help="Whether to use text normalization (default: True)")
+    parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16",
+                       help="Model data type (default: bf16)")
+    parser.add_argument("--attn_implementation", choices=["flash_attention_2", "sdpa", "eager"], default="flash_attention_2",
+                       help="Attention implementation (default: flash_attention_2)")
     
     args = parser.parse_args()
+    
+    # Convert dtype string to torch dtype
+    dtype_mapping = {
+        "bf16": torch.bfloat16,
+        "fp16": torch.float16,
+        "fp32": torch.float32
+    }
+    torch_dtype = dtype_mapping[args.dtype]
     
     # Create output directory if it doesn't exist
     os.makedirs(args.output_dir, exist_ok=True)
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
+    print(f"Using dtype: {args.dtype} ({torch_dtype})")
+    print(f"Using attention implementation: {args.attn_implementation}")
     
     # Load models
     print("Loading models...")
-    tokenizer, model, spt = load_model(MODEL_PATH, SPT_CONFIG_PATH, SPT_CHECKPOINT_PATH)
+    tokenizer, model, spt = load_model(MODEL_PATH, SPT_CONFIG_PATH, SPT_CHECKPOINT_PATH, 
+                                      torch_dtype=torch_dtype, attn_implementation=args.attn_implementation)
     spt = spt.to(device)
     model = model.to(device)
     

@@ -77,6 +77,8 @@ Parameters:
 - `--output_dir`: Directory where the generated audio files will be saved.
 - `--seed`: Random seed for reproducibility.
 - `--use_normalize`: Whether to normalize the text input (default is `True`).
+- `--dtype`: Model data type (default is `bf16`).
+- `--attn_implementation`: Attention implementation (default is `flash_attention_2`, `sdpa` and `eager` are also supported).
 
 #### JSONL Input Format
 
