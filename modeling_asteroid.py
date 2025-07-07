@@ -85,6 +85,7 @@ class CustomMixin(GenerationMixin):
         needs_additional_steps = -1 * torch.ones(batch_size, dtype=torch.long, device=input_ids.device)
         tf_inputs = input_ids[:]
         input_ids = input_ids[:, :-(channels - 1)]
+        cur_len = input_ids.shape[1]
         model_kwargs["attention_mask"] = model_kwargs["attention_mask"][:, :-(channels - 1)]
         base_length = input_ids.shape[1]
         model_kwargs = self._get_initial_cache_position(cur_len, input_ids.device, model_kwargs)
