@@ -10,43 +10,65 @@ from generation_utils import load_model, process_batch
 
 def load_examples_from_jsonl():
     """
-    Load examples from examples/examples.jsonl and convert to ROLE_EXAMPLES format
+    Load examples from examples/examples.jsonl and convert to format for both ROLE and SINGLE modes
     """
-    examples = []
-    jsonl_path = "examples/examples.jsonl"
-    
-    if not os.path.exists(jsonl_path):
-        print(f"Warning: {jsonl_path} not found")
-        return []
+    jsonl_paths = ["examples/examples.jsonl", "examples/examples_single_reference.jsonl"]
 
-    with open(jsonl_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
+    role_examples = []
+    single_examples = []
 
-            data = json.loads(line)
+    lines = []
+
+    for jsonl_path in jsonl_paths:
+        if not os.path.exists(jsonl_path):
+            print(f"Warning: {jsonl_path} not found")
+            continue
+        with open(jsonl_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                lines.append(line)
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+                continue
+
+        data = json.loads(line)
+        
+        # Extract required fields
+        text = data.get('text', '')
+        base_path = data.get('base_path', 'examples')
+        use_normalize = data.get('use_normalize', True)
+        
+        # Check if this is a role-based example (has speaker1 and speaker2 audio)
+        if 'prompt_audio_speaker1' in data and 'prompt_audio_speaker2' in data:
+            # Role mode example
+            audio_mode = "Role"
+            prompt_audio_1 = os.path.join(base_path, data['prompt_audio_speaker1'])
+            prompt_text_1 = data.get('prompt_text_speaker1', '')
+            prompt_audio_2 = os.path.join(base_path, data['prompt_audio_speaker2'])
+            prompt_text_2 = data.get('prompt_text_speaker2', '')
             
-            # Extract required fields
-            text = data.get('text', '')
-            base_path = data.get('base_path', 'examples')
+            example = [text, audio_mode, prompt_audio_1, prompt_text_1, prompt_audio_2, prompt_text_2, use_normalize]
+            role_examples.append(example)
             
-            # Check if this is a role-based example (has speaker1 and speaker2 audio)
-            if 'prompt_audio_speaker1' in data and 'prompt_audio_speaker2' in data:
-                # Role mode example
-                audio_mode = "Role"
-                prompt_audio_1 = os.path.join(base_path, data['prompt_audio_speaker1'])
-                prompt_text_1 = data.get('prompt_text_speaker1', '')
-                prompt_audio_2 = os.path.join(base_path, data['prompt_audio_speaker2'])
-                prompt_text_2 = data.get('prompt_text_speaker2', '')
-                use_normalize = True
-                
-                example = [text, audio_mode, prompt_audio_1, prompt_text_1, prompt_audio_2, prompt_text_2, use_normalize]
-                examples.append(example)
+        # Check if this is a single audio example (has prompt_audio and prompt_text)
+        elif 'prompt_audio' in data and 'prompt_text' in data:
+            # Single mode example
+            audio_mode = "Single"
+            prompt_audio = os.path.join(base_path, data['prompt_audio'])
+            prompt_text = data.get('prompt_text', '')
+            
+            example = [text, audio_mode, prompt_audio, prompt_text, use_normalize]
+            single_examples.append(example)
     
-    print(f"Loaded {len(examples)} examples from {jsonl_path}")
-    return examples
+    print(f"Loaded {len(role_examples)} role examples and {len(single_examples)} single examples from {jsonl_paths}")
+    return role_examples, single_examples
 
 # Load examples from JSONL file
-ROLE_EXAMPLES = load_examples_from_jsonl()
+ROLE_EXAMPLES, SINGLE_EXAMPLES = load_examples_from_jsonl()
 
 # Language configuration
 LANGUAGES = {
@@ -61,6 +83,7 @@ LANGUAGES = {
         "select_input_mode": "Select input mode",
         "mode_info": "Single Audio: Upload one audio with [S1][S2] text; Role Audio: Upload separate audio for Role1 and Role2",
         "drag_drop_audio": "Drag and drop audio here - or - click to upload",
+        "single_warning": "⚠️ Warning: The current model (v0.5) performs poorly with single-speaker reference audio. Please upload audio containing two speakers.",
         "prompt_text": "Prompt Text",
         "prompt_placeholder": "Format: [S1]Role1 text[S2]Role2 text",
         "role1_audio": "**Role1 Audio**",
@@ -76,7 +99,10 @@ LANGUAGES = {
         "status_info": "Status Information",
         "examples": "### Examples",
         "examples_desc": "Click on examples below to auto-fill the form",
-        "role_headers": ["Text to Synthesize", "Input Mode", "Role1 Audio File", "Role1 Text", "Role2 Audio File", "Role2 Text", "Use Normalize"]
+        "role_examples": "Role Mode Examples",
+        "single_examples": "Single Audio Mode Examples",
+        "role_headers": ["Text to Synthesize", "Input Mode", "Role1 Audio File", "Role1 Text", "Role2 Audio File", "Role2 Text", "Use Normalize"],
+        "single_headers": ["Text to Synthesize", "Input Mode", "Audio File", "Prompt Text", "Use Normalize"]
     },
     "中文": {
         "title": "MOSS-TTSD🪐 对话语音生成",
@@ -89,6 +115,7 @@ LANGUAGES = {
         "select_input_mode": "选择输入模式",
         "mode_info": "单音频：上传一个包含[S1][S2]文本的音频；角色音频：分别为角色1和角色2上传音频",
         "drag_drop_audio": "拖拽音频文件到此处 - 或 - 点击上传",
+        "single_warning": "⚠️ 警告：当前模型（v0.5）在单说话人参考音频上表现较差，请上传包含两个说话人的音频。",
         "prompt_text": "提示文本",
         "prompt_placeholder": "格式：[S1]角色1文本[S2]角色2文本",
         "role1_audio": "**角色1音频**",
@@ -104,7 +131,10 @@ LANGUAGES = {
         "status_info": "状态信息",
         "examples": "### 示例",
         "examples_desc": "点击下方示例自动填充表单",
-        "role_headers": ["要合成的文本", "输入模式", "角色1音频文件", "角色1文本", "角色2音频文件", "角色2文本", "使用规范化"]
+        "role_examples": "角色模式示例",
+        "single_examples": "单音频模式示例",
+        "role_headers": ["要合成的文本", "输入模式", "角色1音频文件", "角色1文本", "角色2音频文件", "角色2文本", "使用规范化"],
+        "single_headers": ["要合成的文本", "输入模式", "音频文件", "提示文本", "使用规范化"]
     }
 }
 
@@ -292,6 +322,9 @@ def create_gradio_interface() -> gr.Blocks:
                 
                 # Single audio mode
                 with gr.Group(visible=True) as single_mode_group:
+                    single_warning_md = gr.Markdown(
+                        "⚠️ Warning: The current model (v0.5) performs poorly with single-speaker reference audio. Please upload audio containing two speakers."
+                    )
                     prompt_audio_single = gr.File(
                         label="Drag and drop audio here - or - click to upload",
                         file_types=["audio"],
@@ -352,10 +385,21 @@ def create_gradio_interface() -> gr.Blocks:
                 examples_md = gr.Markdown("### Examples")
                 examples_desc_md = gr.Markdown("Click on examples below to auto-fill the form")
 
-                role_examples = gr.Examples(
-                    examples=ROLE_EXAMPLES,
-                    inputs=[text_input, audio_mode, prompt_audio_1, prompt_text_1, prompt_audio_2, prompt_text_2, use_normalize_single],
-                )
+                # Role mode examples
+                with gr.Group():
+                    role_examples_md = gr.Markdown("**Role Mode Examples**")
+                    role_examples = gr.Examples(
+                        examples=ROLE_EXAMPLES,
+                        inputs=[text_input, audio_mode, prompt_audio_1, prompt_text_1, prompt_audio_2, prompt_text_2, use_normalize_single],
+                    )
+                
+                # Single audio mode examples
+                with gr.Group():
+                    single_examples_md = gr.Markdown("**Single Audio Mode Examples**")
+                    single_examples = gr.Examples(
+                        examples=SINGLE_EXAMPLES,
+                        inputs=[text_input, audio_mode, prompt_audio_single, prompt_text_single, use_normalize_single],
+                    )
         
         # Event handlers
         
@@ -387,6 +431,7 @@ def create_gradio_interface() -> gr.Blocks:
                     label=texts["select_input_mode"],
                     info=texts["mode_info"]
                 ),  # audio_mode
+                gr.Markdown(texts["single_warning"]),  # single_warning_md
                 gr.File(
                     label=texts["drag_drop_audio"],
                     file_types=["audio"],
@@ -428,7 +473,10 @@ def create_gradio_interface() -> gr.Blocks:
                 ),  # status_info
                 texts["examples"],  # examples_md
                 texts["examples_desc"],  # examples_desc_md
-                gr.Dataset(headers=texts["role_headers"])
+                texts["role_examples"],  # role_examples_md
+                texts["single_examples"],  # single_examples_md
+                gr.Dataset(headers=texts["role_headers"]),
+                gr.Dataset(headers=texts["single_headers"]),
             )
         
         language_selector.change(
@@ -436,11 +484,13 @@ def create_gradio_interface() -> gr.Blocks:
             inputs=[language_selector],
             outputs=[
                 title_md, script_input_md, text_input, use_normalize_single,
-                audio_input_mode_md, audio_mode, prompt_audio_single, prompt_text_single,
+                audio_input_mode_md, audio_mode, single_warning_md,
+                prompt_audio_single, prompt_text_single,
                 role1_audio_md, prompt_audio_1, prompt_text_1,
                 role2_audio_md, prompt_audio_2, prompt_text_2,
                 generate_btn, output_audio, status_info,
-                examples_md, examples_desc_md, role_examples.dataset,
+                examples_md, examples_desc_md, role_examples_md, single_examples_md,
+                role_examples.dataset, single_examples.dataset
             ]
         )
         
