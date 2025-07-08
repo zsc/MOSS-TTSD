@@ -193,9 +193,9 @@ python podcast_generate.py "your_input" -l en
 
 The tool supports generating scripts in both English (`en`) and Chinese (`zh`), defaulting to Chinese. You can use the `--language` or `-l` flag to specify the language.
 
-## Fine-Tune
+## Fine-Tuning
 
-We provide basic fine-tuning scripts and tools for generating the required fine-tuning data, which are located in the `finetune_utils` folder.
+We provide basic fine-tuning scripts and tools for preprocessing the required fine-tuning data, which are located in the `finetune_utils` folder.
 
 ### File Structure
 
@@ -203,20 +203,41 @@ We provide basic fine-tuning scripts and tools for generating the required fine-
 MOSS-TTSD/
 ├── finetune_workflow.py              # One-click fine-tuning workflow script
 └── finetune_utils/
-    ├── data_generation.py            # Data preprocessing script
+    ├── data_preprocess.py            # Data preprocessing script
     ├── finetune.py                   # Fine-tuning training script
     ├── training_config.yaml          # Training configuration template
     └── finetune_config.yaml          # Workflow configuration template
 ```
 
-### Data Generation
+### Environment Setup
+
+Before running fine-tuning scripts, please make sure you have installed all required dependencies. You can use the following commands to set up the environment:
+
+#### Using conda
+
+```bash
+conda create -n moss_ttsd_finetune python=3.10 -y && conda activate moss_ttsd_finetune
+pip install -r requirements_finetune.txt
+pip install flash-attn
+```
+
+#### Using venv
+
+```bash
+python -m venv moss_ttsd_finetune
+source moss_ttsd_finetune/bin/activate
+pip install -r requirements_finetune.txt
+pip install flash-attn --no-build-isolation
+```
+
+### Data Preparation
 
 Following the data organization format described in the previous section [Usage/Local Inference/JSONL Input Format](#jsonl-input-format) create your JSONL files. Each file can contain one or more entries that conform to the specified format. You can refer to examples.jsonl and examples_single_reference.jsonl in the examples folder for guidance.
 
-Once you have prepared the JSONL file, you can manually generate the data using the `data_generation.py` tool. For example:
+Once you have prepared the JSONL file, you can manually preprocess the data using the `data_preprocess.py` tool. For example:
 
 ```bash
-python finetune_utils/data_generation.py --jsonl <path_to_jsonl> --model_path <path_to_model> --output_dir <output_directory> --data_name <data_name> [--use_normalize]
+python finetune_utils/data_preprocess.py --jsonl <path_to_jsonl> --model_path <path_to_model> --output_dir <output_directory> --data_name <data_name> [--use_normalize]
 ```
 
 > **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
@@ -236,7 +257,7 @@ The script will generate two files in the specified output directory:
 1. `<data_name>.pkl`: Contains the processed training data with input_ids
 2. `<data_name>_metas.npy`: Contains offset metadata for efficient data loading
 
-### Fine-Tuning Training
+### Training
 
 After generating the processed training data, you can use the `finetune.py` script to fine-tune the MOSS-TTSD model on your custom dataset.
 
@@ -261,7 +282,7 @@ The training parameters can be configured via a YAML file. The default configura
 
 ### One-Click Fine-Tuning Workflow
 
-For a simplified fine-tuning experience, we provide a complete workflow script (`finetune_workflow.py`) that automates both data generation and model fine-tuning in a single command. This eliminates the need to run separate scripts and ensures a streamlined process.
+For a simplified fine-tuning experience, we provide a complete workflow script (`finetune_workflow.py`) that automates both data preprocessing and model fine-tuning in a single command. This eliminates the need to run separate scripts and ensures a streamlined process.
 
 #### Quick Start
 
@@ -297,7 +318,7 @@ training_config_file : /path/to/training_config.yaml
 #### Usage
 
 ```bash
-python finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_generation]
+python finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
 ```
 
 > **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
@@ -305,7 +326,7 @@ python finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_generati
 #### Parameters
 
 - `-c`, `--cfg`: Path to the workflow configuration YAML file (default: `./finetune_utils/finetune_config.yaml`)
-- `-pd`, `--pass_data_generation`: Skip data generation step and proceed directly to fine-tuning
+- `-pd`, `--pass_data_preprocess`: Skip data preprocess step and proceed directly to fine-tuning
 
 ## Demos
 

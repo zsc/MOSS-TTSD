@@ -1,6 +1,6 @@
 import yaml
 import argparse
-from finetune_utils.data_generation import process_data
+from finetune_utils.data_preprocess import process_data
 from finetune_utils import finetune
 import torch
 import os
@@ -13,7 +13,7 @@ DEFAULT_MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"  # Download the model from Hugging Fa
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finetune Asteroid TTS Instruct Model")
     parser.add_argument("-c","--cfg", type=str, default="./finetune_utils/finetune_config.yaml", help="Path to the finetune workflow configuration file")
-    parser.add_argument("-pd","--pass_data_generation", action="store_true", default=False, help="Skip data generation step and proceed directly to fine-tuning")
+    parser.add_argument("-pd","--pass_data_preprocess", action="store_true", default=False, help="Skip data preprocess step and proceed directly to fine-tuning")
     args = parser.parse_args()
 
     if not os.path.exists(args.cfg):
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     else:
         with open(args.cfg, 'r') as f:
             config = yaml.safe_load(f)
-    if not args.pass_data_generation:
+    if not args.pass_data_preprocess:
         if not config.get('path_to_jsonl'):
             raise ValueError("JSONL file path is required in the configuration.")
         elif not os.path.exists(config['path_to_jsonl']):
@@ -45,8 +45,8 @@ if __name__ == "__main__":
         )
         print("Data processing completed.")
     else:
-        print("Skipping data generation step.")
-        # Validate model path for fine-tuning when skipping data generation
+        print("Skipping data preprocess step.")
+        # Validate model path for fine-tuning when skipping data preprocess
         if not config.get('path_to_model'):
             config['path_to_model'] = DEFAULT_MODEL_PATH
         elif config['path_to_model'] != DEFAULT_MODEL_PATH and not os.path.exists(config['path_to_model']):
