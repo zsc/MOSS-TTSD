@@ -21,7 +21,7 @@ if __name__ == "__main__":
     else:
         with open(args.cfg, 'r') as f:
             config = yaml.safe_load(f)
-    if not args.pd:
+    if not args.pass_data_generation:
         if not config.get('path_to_jsonl'):
             raise ValueError("JSONL file path is required in the configuration.")
         elif not os.path.exists(config['path_to_jsonl']):
