@@ -251,6 +251,7 @@ def normalize_text(text: str) -> str:
     5. Multiple 。 keep only the last one, others → ，。
     6. Replace consecutive "哈" (>=2) with "(笑)".
     7. Auto-recognize [S1] / [S2] … tags; if missing, treat as whole segment.
+    8. Merge adjacent identical speaker tags.
     """
     # Replace [1], [2] etc. format with [S1], [S2] etc. format
     text = re.sub(r'\[(\d+)\]', r'[S\1]', text)
@@ -264,7 +265,7 @@ def normalize_text(text: str) -> str:
 
     # Use positive lookahead to split text by speaker tags (tags themselves are still preserved)
     segments = re.split(r'(?=\[S\d+\])', text.replace("\n", " "))
-    normalized_lines = []
+    processed_parts = []
 
     for seg in segments:
         seg = seg.strip()
@@ -305,9 +306,27 @@ def normalize_text(text: str) -> str:
             body = content[:-1].replace('。', '，')
             content = body + last_ch
 
-        normalized_lines.append(f"{tag}{content}".strip())
+        processed_parts.append({'tag': tag, 'content': content})
 
-    return "".join(normalized_lines).replace('‘', "'").replace('’', "'")
+    if not processed_parts:
+        return ""
+
+    # Merge consecutive same speakers
+    merged_lines = []
+    current_tag = processed_parts[0]['tag']
+    current_content = [processed_parts[0]['content']]
+
+    for part in processed_parts[1:]:
+        if part['tag'] == current_tag and current_tag:
+            current_content.append(part['content'])
+        else:
+            merged_lines.append(f"{current_tag}{''.join(current_content)}".strip())
+            current_tag = part['tag']
+            current_content = [part['content']]
+
+    merged_lines.append(f"{current_tag}{''.join(current_content)}".strip())
+    
+    return "".join(merged_lines).replace('‘', "'").replace('’', "'")
 
 
 def process_batch(batch_items, tokenizer, model, spt, device, system_prompt, start_idx, use_normalize=False):
