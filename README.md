@@ -195,13 +195,13 @@ The tool supports generating scripts in both English (`en`) and Chinese (`zh`), 
 
 ## Fine-Tuning
 
-We provide basic fine-tuning scripts and tools for preprocessing the required fine-tuning data, which are located in the `finetune_utils` folder.
+We provide basic fine-tuning scripts and tools for preprocessing the required fine-tuning data, which are located in the `finetune` folder.
 
 ### File Structure
 
 ```
 MOSS-TTSD/
-└── finetune_utils/
+└── finetune/
     ├── requirements_finetune.txt     # Fine-tuning specific dependencies
     ├── finetune_workflow.py          # One-click fine-tuning workflow script
     ├── data_preprocess.py            # Data preprocessing script
@@ -218,7 +218,7 @@ Before running fine-tuning scripts, please make sure you have installed all requ
 
 ```bash
 conda create -n moss_ttsd_finetune python=3.10 -y && conda activate moss_ttsd_finetune
-pip install -r finetune_utils/requirements_finetune.txt
+pip install -r finetune/requirements_finetune.txt
 pip install flash-attn
 ```
 
@@ -227,7 +227,7 @@ pip install flash-attn
 ```bash
 python -m venv moss_ttsd_finetune
 source moss_ttsd_finetune/bin/activate
-pip install -r finetune_utils/requirements_finetune.txt
+pip install -r finetune/requirements_finetune.txt
 pip install flash-attn --no-build-isolation
 ```
 
@@ -238,7 +238,7 @@ Following the data organization format described in the previous section [Usage/
 Once you have prepared the JSONL file, you can manually preprocess the data using the `data_preprocess.py` tool. For example:
 
 ```bash
-python finetune_utils/data_preprocess.py --jsonl <path_to_jsonl> --model_path <path_to_model> --output_dir <output_directory> --data_name <data_name> [--use_normalize]
+python finetune/data_preprocess.py --jsonl <path_to_jsonl> --model_path <path_to_model> --output_dir <output_directory> --data_name <data_name> [--use_normalize]
 ```
 
 > **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
@@ -265,7 +265,7 @@ After generating the processed training data, you can use the `finetune.py` scri
 #### Usage
 
 ```bash
-python finetune_utils/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_cfg <training_config_file>]
+python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_cfg <training_config_file>]
 ```
 
 > **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
@@ -279,7 +279,7 @@ python finetune_utils/finetune.py --model_path <path_to_model> --data_dir <path_
 
 #### Training Configuration
 
-The training parameters can be configured via a YAML file. The default configuration is located at `finetune_utils/training_config.yaml`.
+The training parameters can be configured via a YAML file. The default configuration is located at `finetune/training_config.yaml`.
 
 ### One-Click Fine-Tuning Workflow
 
@@ -287,12 +287,12 @@ For a simplified fine-tuning experience, we provide a complete workflow script (
 
 #### Quick Start
 
-1. **Configure your workflow**: Fill in the configuration template at `finetune_utils/finetune_config.yaml`
+1. **Configure your workflow**: Fill in the configuration template at `finetune/finetune_config.yaml`
 2. **Run the workflow**: Execute the workflow script with your configuration
 
 #### Configuration Template
 
-The workflow uses a YAML configuration file to specify all parameters. You can find an empty template at `finetune_utils/finetune_config.yaml`:
+The workflow uses a YAML configuration file to specify all parameters. You can find an empty template at `finetune/finetune_config.yaml`:
 
 ```yaml
 path_to_jsonl :           # Path to the training data in JSONL format
@@ -319,14 +319,14 @@ training_config_file : /path/to/training_config.yaml
 #### Usage
 
 ```bash
-python finetune_utils/finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
+python finetune/finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
 ```
 
 > **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
 
 #### Parameters
 
-- `-c`, `--cfg`: Path to the workflow configuration YAML file (default: `./finetune_utils/finetune_config.yaml`)
+- `-c`, `--cfg`: Path to the workflow configuration YAML file (default: `./finetune/finetune_config.yaml`)
 - `-pd`, `--pass_data_preprocess`: Skip data preprocess step and proceed directly to fine-tuning
 
 ## Demos
