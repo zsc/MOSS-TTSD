@@ -12,7 +12,7 @@ DEFAULT_MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"  # Download the model from Hugging Fa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finetune Asteroid TTS Instruct Model")
-    parser.add_argument("-c","--cfg", type=str, default="./finetune_utils/finetune_config.yaml", help="Path to the finetune workflow configuration file")
+    parser.add_argument("-c","--cfg", type=str, required=True, help="Path to the finetune workflow configuration file")
     parser.add_argument("-pd","--pass_data_preprocess", action="store_true", default=False, help="Skip data preprocess step and proceed directly to fine-tuning")
     args = parser.parse_args()
 

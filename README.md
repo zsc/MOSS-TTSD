@@ -326,7 +326,7 @@ python finetune/finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data
 
 #### Parameters
 
-- `-c`, `--cfg`: Path to the workflow configuration YAML file (default: `./finetune/finetune_config.yaml`)
+- `-c`, `--cfg`: Path to the workflow configuration YAML file (required)
 - `-pd`, `--pass_data_preprocess`: Skip data preprocess step and proceed directly to fine-tuning
 
 ## Demos
