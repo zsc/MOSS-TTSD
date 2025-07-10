@@ -265,7 +265,7 @@ After generating the processed training data, you can use the `finetune.py` scri
 #### Usage
 
 ```bash
-python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_cfg <training_config_file>]
+python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_config <training_config_file>]
 ```
 
 > **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
@@ -275,7 +275,7 @@ python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_pro
 - `--model_path`: Path to the pre-trained MOSS-TTSD model directory
 - `--data_dir`: Directory containing the processed training data (.pkl and _metas.npy files) (required)
 - `--output_dir`: Directory where the fine-tuned model will be saved (required)
-- `--training_cfg`: Path to the training configuration YAML file (default: `training_config.yaml`)
+- `--training_config`: Path to the training configuration YAML file (default: `training_config.yaml`)
 
 #### Training Configuration
 
@@ -319,14 +319,14 @@ training_config_file : /path/to/training_config.yaml
 #### Usage
 
 ```bash
-python finetune/finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
+python finetune/finetune_workflow.py --config path/to/your/config.yaml [--pass_data_preprocess]
 ```
 
 > **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
 
 #### Parameters
 
-- `-c`, `--cfg`: Path to the workflow configuration YAML file (required)
+- `-c`, `--config`: Path to the workflow configuration YAML file (required)
 - `-pd`, `--pass_data_preprocess`: Skip data preprocess step and proceed directly to fine-tuning
 
 ## Demos

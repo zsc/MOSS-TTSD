@@ -12,14 +12,14 @@ DEFAULT_MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"  # Download the model from Hugging Fa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finetune Asteroid TTS Instruct Model")
-    parser.add_argument("-c","--cfg", type=str, required=True, help="Path to the finetune workflow configuration file")
+    parser.add_argument("-c","--config", type=str, required=True, help="Path to the finetune workflow configuration file")
     parser.add_argument("-pd","--pass_data_preprocess", action="store_true", default=False, help="Skip data preprocess step and proceed directly to fine-tuning")
     args = parser.parse_args()
 
-    if not os.path.exists(args.cfg):
-        raise ValueError(f"Configuration file '{args.cfg}' does not exist.")
+    if not os.path.exists(args.config):
+        raise ValueError(f"Configuration file '{args.config}' does not exist.")
     else:
-        with open(args.cfg, 'r') as f:
+        with open(args.config, 'r') as f:
             config = yaml.safe_load(f)
     if not args.pass_data_preprocess:
         if not config.get('path_to_jsonl'):
@@ -57,11 +57,11 @@ if __name__ == "__main__":
     elif not os.path.exists(config['finetuned_model_output']):
         os.makedirs(config['finetuned_model_output'])
 
-    training_cfg = {}
+    training_config = {}
     training_config_file = config.get('training_config_file')
     if training_config_file and os.path.exists(training_config_file):
         with open(training_config_file, 'r') as f:
-            training_cfg = yaml.safe_load(f)
+            training_config = yaml.safe_load(f)
     else:
         print("Training config file not found or not specified, using default training configuration.")
     
@@ -70,6 +70,6 @@ if __name__ == "__main__":
         model_path=str(config['path_to_model']),
         data_dir=str(config['data_output_directory']),
         output_dir=str(config['finetuned_model_output']),
-        training_cfg=training_cfg,
+        training_config=training_config,
         device=str(config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
     )
