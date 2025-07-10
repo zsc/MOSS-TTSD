@@ -1,7 +1,7 @@
 import yaml
 import argparse
-from finetune_utils.data_preprocess import process_data
-from finetune_utils import finetune
+from data_preprocess import process_data
+import finetune
 import torch
 import os
 

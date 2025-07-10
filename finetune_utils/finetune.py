@@ -153,7 +153,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, help="Path to the pre-trained model")
     parser.add_argument("--data_dir", type=str, required=True, help="Directory containing the training data")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for generated audio files")
-    parser.add_argument("--training_cfg", type=str, default="training_config.yaml",
+    parser.add_argument("--training_cfg", type=str, default=None,
                         help="Path to the training configuration file")
     
     args = parser.parse_args()

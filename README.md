@@ -201,11 +201,12 @@ We provide basic fine-tuning scripts and tools for preprocessing the required fi
 
 ```
 MOSS-TTSD/
-├── finetune_workflow.py              # One-click fine-tuning workflow script
 └── finetune_utils/
+    ├── requirements_finetune.txt     # Fine-tuning specific dependencies
+    ├── finetune_workflow.py          # One-click fine-tuning workflow script
     ├── data_preprocess.py            # Data preprocessing script
     ├── finetune.py                   # Fine-tuning training script
-    ├── training_config.yaml          # Training configuration template
+    ├── training_config.yaml          # Training hyperparameters configuration
     └── finetune_config.yaml          # Workflow configuration template
 ```
 
@@ -217,7 +218,7 @@ Before running fine-tuning scripts, please make sure you have installed all requ
 
 ```bash
 conda create -n moss_ttsd_finetune python=3.10 -y && conda activate moss_ttsd_finetune
-pip install -r requirements_finetune.txt
+pip install -r finetune_utils/requirements_finetune.txt
 pip install flash-attn
 ```
 
@@ -226,7 +227,7 @@ pip install flash-attn
 ```bash
 python -m venv moss_ttsd_finetune
 source moss_ttsd_finetune/bin/activate
-pip install -r requirements_finetune.txt
+pip install -r finetune_utils/requirements_finetune.txt
 pip install flash-attn --no-build-isolation
 ```
 
@@ -318,7 +319,7 @@ training_config_file : /path/to/training_config.yaml
 #### Usage
 
 ```bash
-python finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
+python finetune_utils/finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
 ```
 
 > **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
