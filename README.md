@@ -300,12 +300,10 @@ After generating the processed training data, you can use the `finetune.py` scri
 python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> --training_config <training_config_file>
 ```
 
-**LoRA fine-tuning (recommended for resource efficiency):**
+**LoRA fine-tuning:**
 ```bash
-python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_config <training_config_file>] [--lora_config <lora_config_file>]  [--lora]
+python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> --training_config <training_config_file> --lora_config <lora_config_file>  --lora
 ```
-
-> **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
 
 #### Parameters
 
@@ -315,19 +313,6 @@ python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_pro
 - `--training_config`: Path to the training configuration YAML file (default: `training_config.yaml`)
 - `--lora_config`: Path to the LoRA configuration YAML file (default: `lora_config.yaml`)
 - `--lora`: Enable LoRA (Low-Rank Adaptation) fine-tuning for memory efficiency (optional)
-
-#### Fine-Tuning Methods
-
-**Full Model Fine-Tuning:**
-- Updates all model parameters
-- Requires more GPU memory and training time
-- Generally provides better performance for large datasets
-
-**LoRA Fine-Tuning:**
-- Only updates a small subset of parameters using low-rank adaptation
-- Much more memory efficient (suitable for consumer GPUs)
-- Faster training and smaller checkpoint files
-- Recommended for most use cases, especially with limited computational resources
 
 #### LoRA Configuration
 
