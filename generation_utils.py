@@ -29,47 +29,56 @@ def process_jsonl_item(item):
     base_path = item.get("base_path", "")
     text = item.get("text", "")
     
+    prompt_audio = None
+    prompt_text = ""
+
     # Process prompt audio and text
     if "prompt_audio" in item and "prompt_text" in item:
         print("Using prompt_audio and prompt_text directly from item.")
         # If prompt_audio and prompt_text exist, use them directly
-        prompt_audio = item["prompt_audio"]
-        prompt_text = item["prompt_text"]
+        prompt_audio_val = item["prompt_audio"]
+        if prompt_audio_val: # Only assign if not empty
+            prompt_audio = prompt_audio_val
+            prompt_text = item["prompt_text"]
         
-        # Only perform path joining when prompt_audio is a string path
-        if isinstance(prompt_audio, str) and base_path and prompt_audio:
-            prompt_audio = os.path.join(base_path, prompt_audio)
+            # Only perform path joining when prompt_audio is a string path
+            if isinstance(prompt_audio, str) and base_path and prompt_audio:
+                prompt_audio = os.path.join(base_path, prompt_audio)
     else:
-        print("Using speaker1 and speaker2 information for prompt audio and text.")
         # Otherwise, merge speaker1 and speaker2 information
         prompt_audio_speaker1 = item.get("prompt_audio_speaker1", "")
         prompt_text_speaker1 = item.get("prompt_text_speaker1", "")
         prompt_audio_speaker2 = item.get("prompt_audio_speaker2", "")
         prompt_text_speaker2 = item.get("prompt_text_speaker2", "")
         
-        # Process audio: if it's a string path, perform path joining; if it's a tuple, use directly
-        if isinstance(prompt_audio_speaker1, str):
-            speaker1_audio = os.path.join(base_path, prompt_audio_speaker1) if base_path and prompt_audio_speaker1 else prompt_audio_speaker1
-        else:
-            speaker1_audio = prompt_audio_speaker1  # Use tuple directly
+        has_speaker1_audio = (isinstance(prompt_audio_speaker1, str) and prompt_audio_speaker1) or isinstance(prompt_audio_speaker1, tuple)
+        has_speaker2_audio = (isinstance(prompt_audio_speaker2, str) and prompt_audio_speaker2) or isinstance(prompt_audio_speaker2, tuple)
+
+        if has_speaker1_audio or has_speaker2_audio:
+            print("Using speaker1 and speaker2 information for prompt audio and text.")
+            # Process audio: if it's a string path, perform path joining; if it's a tuple, use directly
+            if isinstance(prompt_audio_speaker1, str):
+                speaker1_audio = os.path.join(base_path, prompt_audio_speaker1) if base_path and prompt_audio_speaker1 else prompt_audio_speaker1
+            else:
+                speaker1_audio = prompt_audio_speaker1  # Use tuple directly
+                
+            if isinstance(prompt_audio_speaker2, str):
+                speaker2_audio = os.path.join(base_path, prompt_audio_speaker2) if base_path and prompt_audio_speaker2 else prompt_audio_speaker2
+            else:
+                speaker2_audio = prompt_audio_speaker2  # Use tuple directly
             
-        if isinstance(prompt_audio_speaker2, str):
-            speaker2_audio = os.path.join(base_path, prompt_audio_speaker2) if base_path and prompt_audio_speaker2 else prompt_audio_speaker2
-        else:
-            speaker2_audio = prompt_audio_speaker2  # Use tuple directly
-        
-        prompt_audio = {
-            "speaker1": speaker1_audio,
-            "speaker2": speaker2_audio
-        }
+            prompt_audio = {
+                "speaker1": speaker1_audio,
+                "speaker2": speaker2_audio
+            }
         
         # Merge text
-        prompt_text = ""
+        temp_prompt_text = ""
         if prompt_text_speaker1:
-            prompt_text += f"[S1]{prompt_text_speaker1}"
+            temp_prompt_text += f"[S1]{prompt_text_speaker1}"
         if prompt_text_speaker2:
-            prompt_text += f"[S2]{prompt_text_speaker2}"
-        prompt_text = prompt_text.strip()
+            temp_prompt_text += f"[S2]{prompt_text_speaker2}"
+        prompt_text = temp_prompt_text.strip()
     
     return {
         "text": text,
@@ -349,8 +358,8 @@ def process_batch(batch_items, tokenizer, model, spt, device, system_prompt, sta
             text = processed_item["text"]
             prompt_text = processed_item["prompt_text"]
             
-            # Merge text
-            full_text = prompt_text + text
+            # Merge text, if prompt_text is empty, full_text is just text
+            full_text = prompt_text + text if prompt_text else text
             original_full_text = full_text  # Save original text
             
             # Apply text normalization based on parameter

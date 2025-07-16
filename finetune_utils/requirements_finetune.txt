@@ -14,4 +14,7 @@ openai
 PyYAML
 einops
 huggingface_hub
+tensorboard
+torch-tb-profiler
+peft
 # flash-attn    # Need to install separately

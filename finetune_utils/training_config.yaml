@@ -1,11 +1,11 @@
-per_device_train_batch_size: 2        # 每设备批次大小，根据显存调整
-gradient_accumulation_steps: 2        # 梯度累积步数，适应大模型
-num_train_epochs: 400                 # 训练轮数
+per_device_train_batch_size: 1        # 每设备批次大小，根据显存调整
+gradient_accumulation_steps: 1        # 梯度累积步数，适应大模型
+num_train_epochs: 20                # 训练轮数
 learning_rate: 1e-4                   # 学习率
 bf16: true                            # 使用 bfloat16 训练
 logging_steps: 10                     # 每多少步记录一次日志
-save_steps: 12650                     # 每多少步保存一次模型
-save_total_limit: 10                  # 最多保存几个检查点
+save_steps: 50                   # 每多少步保存一次模型
+save_total_limit: 10              # 最多保存几个检查点
 dataloader_num_workers: 1             # DataLoader 的工作线程数
-warmup_ratio: 0.01                    # 学习率预热比例
+warmup_ratio: 0.1                    # 学习率预热比例
 lr_scheduler_type: "cosine"           # 学习率调度器类型  

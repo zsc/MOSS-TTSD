@@ -75,17 +75,25 @@ Parameters:
 - `--jsonl`: Path to the input JSONL file containing dialogue scripts and speaker prompts.
 - `--output_dir`: Directory where the generated audio files will be saved.
 - `--seed`: Random seed for reproducibility.
-- `--use_normalize`: Whether to normalize the text input (default is `True`).
+- `--use_normalize`: Whether to normalize the text input (default is `False`, but **recommended to enable** for better text processing).
 - `--dtype`: Model data type (default is `bf16`).
 - `--attn_implementation`: Attention implementation (default is `flash_attention_2`, `sdpa` and `eager` are also supported).
 
 #### JSONL Input Format
 
-The input JSONL file should contain one JSON object per line with the following structure:
+The input JSONL file should contain one JSON object per line. MOSS-TTSD supports multiple input formats:
 
+**Format 1: Text-only input (No voice cloning)**
 ```json
 {
-  "base_path": "examples",
+  "text": "[S1]Speaker 1 dialogue content[S2]Speaker 2 dialogue content[S1]..."
+}
+```
+
+**Format 2: Separate speaker audio references**
+```json
+{
+  "base_path": "/path/to/audio/files",
   "text": "[S1]Speaker 1 dialogue content[S2]Speaker 2 dialogue content[S1]...",
   "prompt_audio_speaker1": "path/to/speaker1_audio.wav",
   "prompt_text_speaker1": "Reference text for speaker 1 voice cloning",
@@ -94,15 +102,7 @@ The input JSONL file should contain one JSON object per line with the following 
 }
 ```
 
-Field descriptions:
-
-- `base_path`: Base directory path for relative file paths
-- `text`: Dialogue script with speaker tags `[S1]` and `[S2]` indicating speaker turns
-- `prompt_audio_speaker1/2`: Path to reference audio files for voice cloning (relative to `base_path`)
-- `prompt_text_speaker1/2`: Reference text corresponding to the audio prompts for better voice matching
-
-In addition to the JSONL format above, the system also supports using a single JSON object where both speakers share the same reference audio file:
-
+**Format 3: Shared audio reference**
 ```json
 {
   "base_path": "/path/to/audio/files",
@@ -112,12 +112,21 @@ In addition to the JSONL format above, the system also supports using a single J
 }
 ```
 
-Field descriptions:
+#### Field Descriptions
 
-- `base_path`: Base directory path for audio files
-- `text`: Dialogue script with speaker tags `[S1]` and `[S2]` indicating speaker turns
+**Common fields:**
+- `text`: Dialogue script with speaker tags `[S1]` and `[S2]` indicating speaker turns (required)
+- `base_path`: Base directory path for relative file paths (optional)
+
+**For voice cloning (Format 2):**
+- `prompt_audio_speaker1/2`: Path to reference audio files for voice cloning (relative to `base_path`)
+- `prompt_text_speaker1/2`: Reference text corresponding to the audio prompts for better voice matching
+
+**For shared reference (Format 3):**
 - `prompt_audio`: Path to shared reference audio file containing both speakers' voices (relative to `base_path`)
 - `prompt_text`: Reference text corresponding to the audio, also using `[S1]` and `[S2]` tags to distinguish speakers
+
+#### Speaker Tags
 
 The dialogue text uses speaker tags to indicate turns:
 
@@ -245,40 +254,118 @@ python finetune_utils/data_preprocess.py --jsonl <path_to_jsonl> --model_path <p
 #### Parameters
 
 - `--jsonl`: Path to the JSONL input file (required)
-- `--model_path`: Path to the pre-trained MOSS-TTSD model directory
+- `--model_path`: Path to the pre-trained MOSS-TTSD model directory (optional, defaults to `fnlp/MOSS-TTSD-v0.5` if not provided)
 - `--output_dir`: Directory where processed data will be saved (required)
 - `--data_name`: Name prefix for the output files (default: `processed_data`)
-- `--use_normalize`: Enable text normalization (default: True)
+- `--use_normalize`: Enable text normalization (default: `False`)
+
+#### Supported JSONL Formats
+
+The data preprocessing script supports two JSONL formats:
+
+**Format 1: Single audio file with full transcript**
+```json
+{
+  "file_path": "/path/to/audio.wav",
+  "full_transcript": "[S1]Speaker content[S2]Speaker content..."
+}
+```
+
+**Format 2: Separate reference and main audio files**
+```json
+{
+  "reference_audio": "/path/to/reference.wav",
+  "reference_text": "[S1]Reference content for voice cloning[S2]Reference content for voice cloning",
+  "audio": "/path/to/main.wav", 
+  "text": "[S1]Speaker content[S2]Speaker content..."
+}
+```
 
 #### Output Files
 
 The script will generate two files in the specified output directory:
 
-1. `<data_name>.pkl`: Contains the processed training data with input_ids
+1. `<data_name>.pkl`: Contains the processed training data with input_ids and labels
 2. `<data_name>_metas.npy`: Contains offset metadata for efficient data loading
 
 ### Training
 
-After generating the processed training data, you can use the `finetune.py` script to fine-tune the MOSS-TTSD model on your custom dataset.
+After generating the processed training data, you can use the `finetune.py` script to fine-tune the MOSS-TTSD model on your custom dataset. The script supports both full model fine-tuning and LoRA (Low-Rank Adaptation) fine-tuning.
 
 #### Usage
 
+**Full model fine-tuning:**
 ```bash
-python finetune_utils/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> [--training_cfg <training_config_file>]
+python finetune_utils/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> --training_cfg <training_config_file>
+```
+
+**LoRA fine-tuning (recommended for resource efficiency):**
+```bash
+python finetune_utils/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> --training_cfg <training_config_file> --lora_cfg <lora_config_file> --lora
 ```
 
 > **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
 
 #### Parameters
 
-- `--model_path`: Path to the pre-trained MOSS-TTSD model directory
+- `--model_path`: Path to the pre-trained MOSS-TTSD model directory (optional, defaults to `fnlp/MOSS-TTSD-v0.5` if not provided)
 - `--data_dir`: Directory containing the processed training data (.pkl and _metas.npy files) (required)
 - `--output_dir`: Directory where the fine-tuned model will be saved (required)
-- `--training_cfg`: Path to the training configuration YAML file (default: `training_config.yaml`)
+- `--training_cfg`: Path to the training configuration YAML file (default: `finetune_utils/training_config.yaml`)
+- `--lora_cfg`: Path to the LoRA configuration YAML file (default: `finetune_utils/lora_config.yaml`)
+- `--lora`: Enable LoRA (Low-Rank Adaptation) fine-tuning for memory efficiency (optional)
+
+#### Fine-Tuning Methods
+
+**Full Model Fine-Tuning:**
+- Updates all model parameters
+- Requires more GPU memory and training time
+- Generally provides better performance for large datasets
+
+**LoRA Fine-Tuning:**
+- Only updates a small subset of parameters using low-rank adaptation
+- Much more memory efficient (suitable for consumer GPUs)
+- Faster training and smaller checkpoint files
+- Recommended for most use cases, especially with limited computational resources
+
+#### LoRA Configuration
+
+When using `--lora`, you can customize the LoRA parameters by editing the configuration file `finetune_utils/lora_config.yaml`. The default configuration is:
+
+```yaml
+r: 8
+lora_alpha: 16
+target_modules:
+  - "q_proj"
+  - "k_proj" 
+  - "v_proj"
+  - "o_proj"
+  - "gate_proj"
+  - "up_proj"
+  - "down_proj"
+lora_dropout: 0.05
+bias: "none"
+use_rslora: true
+```
+
+**LoRA Parameters:**
+- **r (rank)**: Controls the bottleneck size. Lower values use less memory but may limit adaptation capability
+- **lora_alpha**: Scaling factor for LoRA weights. Higher values give LoRA more influence
+- **target_modules**: Which linear layers to adapt. The default covers attention and feed-forward layers
+- **lora_dropout**: Regularization to prevent overfitting
+- **use_rslora**: Enables rank-stabilized LoRA for improved training stability
 
 #### Training Configuration
 
-The training parameters can be configured via a YAML file. The default configuration is located at `finetune_utils/training_config.yaml`.
+The training parameters can be configured via a YAML file. The default configuration is located at `finetune_utils/training_config.yaml`. Key parameters include:
+
+- `per_device_train_batch_size`: Batch size per device (default: 1)
+- `gradient_accumulation_steps`: Steps to accumulate gradients (default: 1)
+- `num_train_epochs`: Number of training epochs (default: 20)
+- `learning_rate`: Learning rate (default: 1e-5)
+- `bf16`: Use bfloat16 precision (default: true)
+- `warmup_ratio`: Warmup ratio (default: 0.01)
+- `lr_scheduler_type`: Learning rate scheduler (default: "cosine")
 
 ### One-Click Fine-Tuning Workflow
 
@@ -300,7 +387,9 @@ data_name :               # Name of the dataset
 use_normalize :           # Whether to normalize the data (true/false)
 path_to_model :           # Path to the pre-trained model (leave empty to use default HuggingFace model)
 finetuned_model_output :  # Directory where the finetuned model will be saved
-training_config_file :    # Path to the training configuration file
+training_config_file : finetune_utils/training_config.yaml  # Path to the training configuration file
+use_lora :                # Whether to use LoRA fine-tuning (true/false)
+lora_config_file : finetune_utils/lora_config.yaml  # Path to the LoRA configuration file
 ```
 
 #### Example Configuration
@@ -313,19 +402,21 @@ use_normalize : true
 path_to_model : # Leave empty to use fnlp/MOSS-TTSD-v0.5 from HuggingFace
 finetuned_model_output : /path/to/output/fine_tuned_model
 training_config_file : /path/to/training_config.yaml
+use_lora : true
+lora_config_file : /path/to/lora_config.yaml
 ```
 
 #### Usage
 
 ```bash
-python finetune_workflow.py --cfg path/to/your/config.yaml [--pass_data_preprocess]
+python finetune_workflow.py --config path/to/your/config.yaml [--pass_data_preprocess]
 ```
 
 > **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
 
 #### Parameters
 
-- `-c`, `--cfg`: Path to the workflow configuration YAML file (default: `./finetune_utils/finetune_config.yaml`)
+- `-c`, `--config`: Path to the workflow configuration YAML file (default: `./finetune_utils/finetune_config.yaml`)
 - `-pd`, `--pass_data_preprocess`: Skip data preprocess step and proceed directly to fine-tuning
 
 ## Demos
