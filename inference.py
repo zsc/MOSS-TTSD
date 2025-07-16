@@ -15,14 +15,15 @@ MAX_CHANNELS = 8
 
 def main():
     parser = argparse.ArgumentParser(description="TTS inference with Asteroid model")
-    parser.add_argument("--jsonl", default="examples/examples.jsonl", 
-                       help="Path to JSONL file (default: examples/examples.jsonl)")
+    parser.add_argument("--jsonl", default="examples/examples.jsonl",help="Path to JSONL file (default: examples/examples.jsonl)")
     parser.add_argument("--seed", type=int, default=None,
                        help="Random seed for reproducibility (default: None)")
     parser.add_argument("--output_dir", default="outputs",
                        help="Output directory for generated audio files (default: outputs)")
-    parser.add_argument("--use_normalize", action="store_true", default=True,
-                       help="Whether to use text normalization (default: True)")
+    parser.add_argument("--summary_file", default=None,
+                       help="Path to save summary jsonl file (default: None)")
+    parser.add_argument("--use_normalize", action="store_true", default=False,
+                       help="Whether to use text normalization (default: False)")
     parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16",
                        help="Model data type (default: bf16)")
     parser.add_argument("--attn_implementation", choices=["flash_attention_2", "sdpa", "eager"], default="flash_attention_2",
@@ -82,6 +83,21 @@ def main():
         start_idx=0,
         use_normalize=args.use_normalize
     )
+    
+    # Save summary if requested
+    if args.summary_file:
+        summary_data = []
+        for item in actual_texts_data:
+            summary_data.append({
+                "text": item["original_text"],
+                "normalized_text": item["normalized_text"],
+                "final_text": item["final_text"]
+            })
+        
+        with open(args.summary_file, "w", encoding="utf-8") as f:
+            for item in summary_data:
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        print(f"Saved summary to {args.summary_file}")
     
     # Save the audio results to files
     saved_count = 0
