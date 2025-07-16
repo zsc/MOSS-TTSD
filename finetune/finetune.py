@@ -15,6 +15,9 @@ from transformers.training_args import TrainingArguments
 from transformers.tokenization_utils import PreTrainedTokenizer
 import argparse
 
+# Import peft related modules
+from peft import LoraConfig, get_peft_model, PeftModel, TaskType
+
 MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"
 MAX_CHANNELS = 8
 
@@ -25,20 +28,26 @@ class LazySupervisedDataset(Dataset):
         pkls = [os.path.join(data_dir, each) for each in os.listdir(data_dir) if each.endswith('.pkl')]
         self.data = []
         for pkl_file in pkls:
+            # Load metas file containing three arrays: [pointers, tokens_lengths, tims_lengths]
             metas = np.load(pkl_file.replace(".pkl", "_metas.npy"))
+            pointers = metas[0]  # Extract byte offset position array
+            
             f = open(pkl_file, "rb")
-            for start_pointer in metas:
-                f.seek(start_pointer) 
+            for start_pointer in pointers:
+                f.seek(int(start_pointer))  # Ensure integer type
                 self.data.append(pickle.load(f))
             f.close()
         random.shuffle(self.data)
+        print(f"Loaded {len(self.data)} training samples")
 
     def __len__(self):
         return len(self.data)
     
     def truncate_and_shift(self, example: Dict[str, List]) -> Dict[str, np.ndarray]:
+        # Read input_ids and labels from data instead of copying input_ids
         input_ids = np.array(example["input_ids"])[:, :self.channels]
-        labels = np.array(example["input_ids"])[:, :self.channels]
+        labels = np.array(example["labels"])[:, :self.channels]  # Use labels from data
+        
         seq_len = input_ids.shape[0]
         new_seq_len = seq_len + self.channels - 1
 
@@ -56,15 +65,15 @@ class LazySupervisedDataset(Dataset):
             "labels": shifted_labels,
             "attention_mask": np.ones(new_seq_len)
         }
-    
-    def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+
+    def __getitem__(self, i) -> Dict[str, np.ndarray]:
         line = self.data[i]
-        result = self.truncate_and_shift(line)
-        return {
-            "input_ids": torch.tensor(result["input_ids"], dtype=torch.long),
-            "labels": torch.tensor(result["labels"], dtype=torch.long),
-            "attention_mask": torch.tensor(result["attention_mask"], dtype=torch.long)
-        }
+        
+        # Data validation
+        if "input_ids" not in line or "labels" not in line:
+            raise ValueError(f"Data format error: sample {i} missing 'input_ids' or 'labels' field")
+        
+        return self.truncate_and_shift(line)  # Return numpy arrays for consistency with original code
 
 @dataclass
 class DataCollatorForSupervisedDataset:
@@ -106,28 +115,62 @@ class DataCollatorForSupervisedDataset:
             "attention_mask": attention_mask
         }
 
-def train(model_path : str, data_dir : str, output_dir : str, training_config : Dict, device: str = "cuda"):
-    print("初始化 tokenizer 和 model")
+def train(model_path : str, data_dir : str, output_dir : str, training_config : Dict, device: str = "cuda", use_lora: bool = False, lora_cfg: Dict = None):
+    print("Initializing tokenizer and model")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.padding_side = "left"
     model = AsteroidTTSInstruct.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
     model.set_weights([8,2,1,1,1,1,1,1])
     model.config.use_cache = False
+    
+    # Configure LoRA parameters if using LoRA
+    if use_lora:
+        print("Configuring LoRA parameters...")
+        
+        # Default LoRA configuration
+        default_lora_config = {
+            'r': 8,
+            'lora_alpha': 16,
+            'target_modules': ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            'lora_dropout': 0.05,
+            'bias': "none",
+            'use_rslora': True
+        }
+        
+        # Merge with user provided configuration
+        if lora_cfg:
+            default_lora_config.update(lora_cfg)
+        
+        print(f"Using LoRA configuration: {default_lora_config}")
+        
+        lora_config = LoraConfig(
+            r=int(default_lora_config['r']),
+            lora_alpha=int(default_lora_config['lora_alpha']),
+            target_modules=default_lora_config['target_modules'],
+            lora_dropout=float(default_lora_config['lora_dropout']),
+            bias=default_lora_config['bias'],
+            task_type=TaskType.CAUSAL_LM,
+            use_rslora=bool(default_lora_config['use_rslora']),
+        )
+        model = get_peft_model(model, lora_config)
+        model.print_trainable_parameters()
+        print("LoRA configuration completed")
+    
     model.to(torch.device(device))
     
-    print("初始化 dataloader")
+    print("Initializing dataloader")
     train_dataset = LazySupervisedDataset(data_dir, MAX_CHANNELS, tokenizer)
     data_collator = DataCollatorForSupervisedDataset(tokenizer.pad_token_id, 2000)
     training_args = TrainingArguments(
         output_dir=output_dir,
-        per_device_train_batch_size=int(training_config.get('per_device_train_batch_size', 2)),
-        gradient_accumulation_steps=int(training_config.get('gradient_accumulation_steps', 2)),
-        num_train_epochs=int(training_config.get('num_train_epochs', 1000)),
-        learning_rate=float(training_config.get('learning_rate', 1e-4)),
+        per_device_train_batch_size=int(training_config.get('per_device_train_batch_size', 1)),
+        gradient_accumulation_steps=int(training_config.get('gradient_accumulation_steps', 1)),
+        num_train_epochs=int(training_config.get('num_train_epochs', 20)),
+        learning_rate=float(training_config.get('learning_rate', 1e-5)),
         bf16=bool(training_config.get('bf16', True)),
         logging_steps=int(training_config.get('logging_steps', 10)),
-        save_steps=int(training_config.get('save_steps', 12650)),
-        save_total_limit=int(training_config.get('save_total_limit', 10)),
+        save_steps=int(training_config.get('save_steps', 50)),
+        save_total_limit=int(training_config.get('save_total_limit', 100)),
         dataloader_num_workers=int(training_config.get('dataloader_num_workers', 1)),
         warmup_ratio=float(training_config.get('warmup_ratio', 0.01)),
         lr_scheduler_type=str(training_config.get('lr_scheduler_type', "cosine")),
@@ -145,7 +188,21 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
 
     trainer.train()
     torch.cuda.synchronize()
-    trainer.save_model(output_dir)
+    
+    # Save model
+    if use_lora:
+        # If using LoRA, merge LoRA weights to base model first, then save complete model
+        print("Merging LoRA weights to base model...")
+        merged_model = model.merge_and_unload()
+        
+        # Save the merged complete model
+        merged_model.save_pretrained(output_dir)
+        print(f"LoRA weights merged and complete model saved to {output_dir}")
+    else:
+        # If not using LoRA, save complete model
+        trainer.save_model(output_dir)
+        print(f"Complete model saved to {output_dir}")
+    
     tokenizer.save_pretrained(output_dir)
 
 if __name__ == "__main__":
@@ -153,8 +210,11 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, help="Path to the pre-trained model")
     parser.add_argument("--data_dir", type=str, required=True, help="Directory containing the training data")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for generated audio files")
-    parser.add_argument("--training_config", type=str, default=None,
+    parser.add_argument("--training_config", type=str, default="finetune/training_config.yaml",
                         help="Path to the training configuration file")
+    parser.add_argument("--lora_config", type=str, default="finetune/lora_config.yaml",
+                        help="Path to the LoRA configuration file")
+    parser.add_argument("--lora", action="store_true", help="Use LoRA (Low-Rank Adaptation) for fine-tuning")
     
     args = parser.parse_args()
     if not args.model_path:
@@ -173,7 +233,26 @@ if __name__ == "__main__":
     training_config = {}
     if args.training_config:
         import yaml
-        with open(args.training_config, 'r') as f:
-            training_config = yaml.safe_load(f)
+        if os.path.exists(args.training_config):
+            with open(args.training_config, 'r') as f:
+                training_config = yaml.safe_load(f)
+            print(f"Successfully loaded training configuration from {args.training_config}: {training_config}")
+        else:
+            print(f"Warning: Configuration file {args.training_config} does not exist, using default parameters.")
     
-    train(args.model_path, args.data_dir, args.output_dir, training_config, device="cuda" if torch.cuda.is_available() else "cpu")
+    lora_cfg = {}
+    if args.lora and args.lora_config:
+        import yaml
+        if os.path.exists(args.lora_config):
+            with open(args.lora_config, 'r') as f:
+                lora_cfg = yaml.safe_load(f)
+            print(f"Successfully loaded LoRA configuration from {args.lora_config}: {lora_cfg}")
+        else:
+            print(f"Warning: LoRA configuration file {args.lora_config} does not exist, using default LoRA parameters.")
+    
+    if args.lora:
+        print("Using LoRA fine-tuning mode")
+    else:
+        print("Using full model fine-tuning mode")
+    
+    train(args.model_path, args.data_dir, args.output_dir, training_config, device="cuda" if torch.cuda.is_available() else "cpu", use_lora=args.lora, lora_cfg=lora_cfg)

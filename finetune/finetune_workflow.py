@@ -12,7 +12,7 @@ DEFAULT_MODEL_PATH = "fnlp/MOSS-TTSD-v0.5"  # Download the model from Hugging Fa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Finetune Asteroid TTS Instruct Model")
-    parser.add_argument("-c","--config", type=str, required=True, help="Path to the finetune workflow configuration file")
+    parser.add_argument("-c","--config", type=str, default="./finetune/finetune_config.yaml", help="Path to the finetune workflow configuration file")
     parser.add_argument("-pd","--pass_data_preprocess", action="store_true", default=False, help="Skip data preprocess step and proceed directly to fine-tuning")
     args = parser.parse_args()
 
@@ -65,11 +65,25 @@ if __name__ == "__main__":
     else:
         print("Training config file not found or not specified, using default training configuration.")
     
+    # Load LoRA configuration if using LoRA
+    lora_cfg = {}
+    use_lora = bool(config.get('use_lora', False))
+    if use_lora:
+        lora_config_file = config.get('lora_config_file', 'finetune/lora_config.yaml')
+        if lora_config_file and os.path.exists(lora_config_file):
+            with open(lora_config_file, 'r') as f:
+                lora_cfg = yaml.safe_load(f)
+            print(f"Loaded LoRA configuration from {lora_config_file}")
+        else:
+            print("LoRA config file not found or not specified, using default LoRA configuration.")
+    
     print("Beginning finetuning...")
     finetune.train(
         model_path=str(config['path_to_model']),
         data_dir=str(config['data_output_directory']),
         output_dir=str(config['finetuned_model_output']),
         training_config=training_config,
-        device=str(config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+        device=str(config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu')),
+        use_lora=use_lora,
+        lora_cfg=lora_cfg
     )
