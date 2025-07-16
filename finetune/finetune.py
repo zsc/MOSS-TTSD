@@ -106,7 +106,7 @@ class DataCollatorForSupervisedDataset:
             "attention_mask": attention_mask
         }
 
-def train(model_path : str, data_dir : str, output_dir : str, training_cfg : Dict, device: str = "cuda"):
+def train(model_path : str, data_dir : str, output_dir : str, training_config : Dict, device: str = "cuda"):
     print("初始化 tokenizer 和 model")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.padding_side = "left"
@@ -120,17 +120,17 @@ def train(model_path : str, data_dir : str, output_dir : str, training_cfg : Dic
     data_collator = DataCollatorForSupervisedDataset(tokenizer.pad_token_id, 2000)
     training_args = TrainingArguments(
         output_dir=output_dir,
-        per_device_train_batch_size=int(training_cfg.get('per_device_train_batch_size', 2)),
-        gradient_accumulation_steps=int(training_cfg.get('gradient_accumulation_steps', 2)),
-        num_train_epochs=int(training_cfg.get('num_train_epochs', 1000)),
-        learning_rate=float(training_cfg.get('learning_rate', 1e-4)),
-        bf16=bool(training_cfg.get('bf16', True)),
-        logging_steps=int(training_cfg.get('logging_steps', 10)),
-        save_steps=int(training_cfg.get('save_steps', 12650)),
-        save_total_limit=int(training_cfg.get('save_total_limit', 10)),
-        dataloader_num_workers=int(training_cfg.get('dataloader_num_workers', 1)),
-        warmup_ratio=float(training_cfg.get('warmup_ratio', 0.01)),
-        lr_scheduler_type=str(training_cfg.get('lr_scheduler_type', "cosine")),
+        per_device_train_batch_size=int(training_config.get('per_device_train_batch_size', 2)),
+        gradient_accumulation_steps=int(training_config.get('gradient_accumulation_steps', 2)),
+        num_train_epochs=int(training_config.get('num_train_epochs', 1000)),
+        learning_rate=float(training_config.get('learning_rate', 1e-4)),
+        bf16=bool(training_config.get('bf16', True)),
+        logging_steps=int(training_config.get('logging_steps', 10)),
+        save_steps=int(training_config.get('save_steps', 12650)),
+        save_total_limit=int(training_config.get('save_total_limit', 10)),
+        dataloader_num_workers=int(training_config.get('dataloader_num_workers', 1)),
+        warmup_ratio=float(training_config.get('warmup_ratio', 0.01)),
+        lr_scheduler_type=str(training_config.get('lr_scheduler_type', "cosine")),
         report_to="tensorboard",
         logging_dir=os.path.join(output_dir, "logs")
     )
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, help="Path to the pre-trained model")
     parser.add_argument("--data_dir", type=str, required=True, help="Directory containing the training data")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for generated audio files")
-    parser.add_argument("--training_cfg", type=str, default="training_config.yaml",
+    parser.add_argument("--training_config", type=str, default=None,
                         help="Path to the training configuration file")
     
     args = parser.parse_args()
@@ -170,10 +170,10 @@ if __name__ == "__main__":
     elif not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    training_cfg = {}
-    if args.training_cfg:
+    training_config = {}
+    if args.training_config:
         import yaml
-        with open(args.training_cfg, 'r') as f:
-            training_cfg = yaml.safe_load(f)
+        with open(args.training_config, 'r') as f:
+            training_config = yaml.safe_load(f)
     
-    train(args.model_path, args.data_dir, args.output_dir, training_cfg, device="cuda" if torch.cuda.is_available() else "cpu")
+    train(args.model_path, args.data_dir, args.output_dir, training_config, device="cuda" if torch.cuda.is_available() else "cpu")
