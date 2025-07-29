@@ -11,6 +11,7 @@ from transformers.generation.configuration_utils import GenerationConfig
 from transformers.generation.stopping_criteria import StoppingCriteriaList
 from transformers import PreTrainedModel, GenerationMixin, Qwen3Config, Qwen3Model
 from transformers.generation.logits_process import LogitsProcessorList, RepetitionPenaltyLogitsProcessor, TopKLogitsWarper, TopPLogitsWarper, TemperatureLogitsWarper
+from liger_kernel.transformers.model.loss_utils import LigerForCausalLMLoss
 
 
 class AsteroidTTSConfig(Qwen3Config):
@@ -59,7 +60,7 @@ class CustomMixin(GenerationMixin):
         streamer: Optional["BaseStreamer"],
         **model_kwargs,
     ) -> Union[GenerateDecoderOnlyOutput, torch.LongTensor]:
-        # 提取配置参数
+        # Extract configuration parameters
         speech_pad_idx = self.config.speech_pad_token
         
         eos_token_id = generation_config.eos_token_id
@@ -72,13 +73,13 @@ class CustomMixin(GenerationMixin):
         has_eos_stopping_criteria = any(hasattr(criteria, "eos_token_id") for criteria in stopping_criteria)
         do_sample = generation_config.do_sample
 
-        # 初始化输出元组
+        # Initialize output tuples
         scores = () if (return_dict_in_generate and output_scores) else None
         raw_logits = () if (return_dict_in_generate and output_logits) else None
         decoder_attentions = () if (return_dict_in_generate and output_attentions) else None
         decoder_hidden_states = () if (return_dict_in_generate and output_hidden_states) else None
 
-        # 初始化跟踪变量
+        # Initialize tracking variables
         batch_size, cur_len, channels = input_ids.shape  # channels = 8
         this_peer_finished = False
         unfinished_sequences = torch.ones(batch_size, dtype=torch.long, device=input_ids.device)
@@ -90,7 +91,7 @@ class CustomMixin(GenerationMixin):
         base_length = input_ids.shape[1]
         model_kwargs = self._get_initial_cache_position(cur_len, input_ids.device, model_kwargs)
 
-        # 定义logits processor
+        # Define logits processor
         if generation_config.do_samples is not None:
             do_samples = generation_config.do_samples
             realprocessor = [LogitsProcessorList() for _ in range(channels)]
@@ -107,18 +108,18 @@ class CustomMixin(GenerationMixin):
             do_samples = [do_sample for _ in range(channels)]
             realprocessor = [logits_processor for _ in range(channels)]
         while self._has_unfinished_sequences(this_peer_finished, synced_gpus, device=input_ids.device):
-            # 准备模型输入
+            # Prepare model inputs
             model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
             model_inputs.update({"output_attentions": output_attentions} if output_attentions else {})
             model_inputs.update({"output_hidden_states": output_hidden_states} if output_hidden_states else {})
-            # 前向传递
+            # Forward pass
             outputs = self(**model_inputs, return_dict=True)
             model_kwargs = self._update_model_kwargs_for_generation(outputs, model_kwargs)
 
             if synced_gpus and this_peer_finished:
                 continue
 
-            # 获取下一个 token 的 logits
+            # Get next token logits
             next_token_logits = [logits[:, -1, :].clone().float().to(input_ids.device) for logits in outputs.logits_all]
             for i, channel_logits in enumerate(next_token_logits):
                 if i != 0 and input_ids.shape[1] + 1 > tf_inputs.shape[1] - 7 + i: 
@@ -126,7 +127,7 @@ class CustomMixin(GenerationMixin):
                 if i == 0 and input_ids.shape[1] + 1 <= tf_inputs.shape[1]: 
                     channel_logits[:, 152694] = - torch.inf
             next_token_scores = [realprocessor[i](input_ids[..., i], logits) for i, logits in enumerate(next_token_logits)]
-            # 生成下一个 token
+            # Generate next tokens
             next_tokens = []
             for i, channel_score in enumerate(next_token_scores):
                 if do_samples[i]:
@@ -135,15 +136,15 @@ class CustomMixin(GenerationMixin):
                     channel_ntk = torch.argmax(channel_score, dim=-1)
                 next_tokens.append(channel_ntk)
             next_tokens = torch.stack(next_tokens, dim=-1)  # [batch_size, channels]
-            # 额外步骤逻辑
+            # Additional steps logic
             indices = (~self.is_speech_token(next_tokens[:, 0])) & (needs_additional_steps < 0)
-            needs_additional_steps[indices] = channels - 1  # 对于 8 个通道，需要 6 步
+            needs_additional_steps[indices] = channels - 1  # For 8 channels, need 7 steps
             
             if input_ids.shape[1] + 1 <= tf_inputs.shape[1]:
                 i = input_ids.shape[1] + 1 - base_length
                 next_tokens[:, i:] = tf_inputs[:, input_ids.shape[1], i:]
             
-            # 在额外步骤中替换 token
+            # Replace tokens in additional steps
             mask = (needs_additional_steps > 0) & (needs_additional_steps < 7)
             if mask.any().item():
                 next_tokens[mask, 0] = self.config.eos_token_id
@@ -160,7 +161,7 @@ class CustomMixin(GenerationMixin):
             if streamer is not None:
                 streamer.put(next_tokens[:, 0].cpu())
             
-            # 更新 unfinished_sequences
+            # Update unfinished_sequences
             needs_additional_steps = torch.where(needs_additional_steps > 0, needs_additional_steps - 1, needs_additional_steps)
             stopping = stopping_criteria(input_ids[..., 0], scores) | (needs_additional_steps == 0)
             unfinished_sequences = unfinished_sequences & ~stopping
@@ -346,11 +347,16 @@ class AsteroidTTSInstruct(AsteroidTTSPretrainedModel, CustomMixin):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
+        skip_logits: Optional[bool] = None,
         **kwargs,
     ) -> Union[Tuple, AsteroidTTSOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        skip_logits = skip_logits if skip_logits is not None else (self.training and labels is not None)
+        if skip_logits and labels is None:
+            skip_logits = False
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
         outputs = self.model(
@@ -368,30 +374,50 @@ class AsteroidTTSInstruct(AsteroidTTSPretrainedModel, CustomMixin):
         )
 
         hidden_states = outputs[0]
-        logits_all = [lm_head(hidden_states) for lm_head in self.lm_heads]
 
-        loss_all = torch.empty(self.channels, device=input_ids.device if not input_ids is None else inputs_embeds.device)
-
+        logits_all = None
+        loss_all = None
+        total_loss = None
+        
         if labels is not None:
+            device = input_ids.device if input_ids is not None else inputs_embeds.device
+            loss_all = torch.empty(self.channels, device=device)
+            logits_list = []
+            
             for i in range(self.config.channels):
                 vocab_size = self.config.vocab_size if i == 0 else self.config.speech_vocab_size
-                loss_all[i] = ForCausalLMLoss(logits_all[i], labels[..., i], vocab_size)
-        
-        # total_weight = sum(self.weights)
-        # normalized_weights = [w / total_weight for w in self.weights]
-        normalized_weights = self.weights
-        
-        total_loss = 0
-        for w, loss in zip(normalized_weights, loss_all):
-            total_loss += w * loss
+                if skip_logits:
+                    loss_all[i] = LigerForCausalLMLoss(
+                        hidden_states=hidden_states,
+                        lm_head_weight=self.lm_heads[i].weight,
+                        labels=labels[..., i],
+                        hidden_size=self.config.hidden_size,
+                        **kwargs
+                    )
+                else:
+                    logits = self.lm_heads[i](hidden_states)
+                    loss_all[i] = ForCausalLMLoss(logits, labels[..., i], vocab_size)
+                    logits_list.append(logits)
+
+            if not skip_logits:
+                logits_all = tuple(logits_list)
+
+            total_weight = sum(self.weights)
+            normalized_weights = [w / total_weight for w in self.weights]
+            
+            total_loss = 0
+            for w, loss in zip(normalized_weights, loss_all):
+                total_loss += w * loss
+        else:
+            logits_all = [lm_head(hidden_states) for lm_head in self.lm_heads]
 
         if not return_dict:
             output = (logits_all,) + outputs[1:]
-            return (total_loss, loss_all, ) + output if loss is not None else output
+            return (total_loss, loss_all, ) + output if total_loss is not None else output
 
         return AsteroidTTSOutputWithPast(
             loss=total_loss,
-            logits=logits_all[0],
+            logits=logits_all[0] if logits_all is not None else None,
             loss_all=loss_all,
             logits_all=logits_all,
             past_key_values=outputs.past_key_values,

@@ -119,9 +119,27 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
     print("Initializing tokenizer and model")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.padding_side = "left"
-    model = AsteroidTTSInstruct.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+    
+    # Load model with CPU offload support
+    model = AsteroidTTSInstruct.from_pretrained(
+        model_path, 
+        torch_dtype=torch.bfloat16, 
+        attn_implementation="flash_attention_2",
+        device_map="auto",  # Enable automatic device mapping with CPU offloading support
+        offload_folder="offload",  # Specify offload folder (will be created automatically)
+        offload_state_dict=True  # Enable state dict offload to CPU
+    )
+    
     model.set_weights([8,2,1,1,1,1,1,1])
     model.config.use_cache = False
+    
+    # Move model to device
+    model.to(torch.device(device))
+    
+    # Enable gradient checkpointing first (on base model)
+    if training_config.get('gradient_checkpointing', True):
+        model.gradient_checkpointing_enable()  # Enable gradient checkpointing
+        print("Gradient checkpointing enabled")
     
     # Configure LoRA parameters if using LoRA
     if use_lora:
@@ -129,8 +147,8 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         
         # Default LoRA configuration
         default_lora_config = {
-            'r': 8,
-            'lora_alpha': 16,
+            'r': 16,
+            'lora_alpha': 32,
             'target_modules': ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
             'lora_dropout': 0.05,
             'bias': "none",
@@ -155,27 +173,46 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         model = get_peft_model(model, lora_config)
         model.print_trainable_parameters()
         print("LoRA configuration completed")
-    
-    model.to(torch.device(device))
+        
+        # Re-enable gradient checkpointing on PEFT model (to ensure compatibility)
+        if training_config.get('gradient_checkpointing', True):
+            # Call base model's method
+            model.base_model.gradient_checkpointing_enable()
+            print("Re-enabled gradient checkpointing on LoRA base model")
+        
+        # Ensure model is in training mode and verify trainable parameters
+        model.train()
+        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        if trainable_params == 0:
+            raise ValueError("No trainable parameters! LoRA configuration might be problematic.")
+        print(f"Number of trainable parameters: {trainable_params:,}")
+    else:
+        model.train()
     
     print("Initializing dataloader")
     train_dataset = LazySupervisedDataset(data_dir, MAX_CHANNELS, tokenizer)
-    data_collator = DataCollatorForSupervisedDataset(tokenizer.pad_token_id, 2000)
+    data_collator = DataCollatorForSupervisedDataset(tokenizer.pad_token_id, 16000)
+    
     training_args = TrainingArguments(
         output_dir=output_dir,
         per_device_train_batch_size=int(training_config.get('per_device_train_batch_size', 1)),
         gradient_accumulation_steps=int(training_config.get('gradient_accumulation_steps', 1)),
-        num_train_epochs=int(training_config.get('num_train_epochs', 20)),
-        learning_rate=float(training_config.get('learning_rate', 1e-5)),
+        num_train_epochs=int(training_config.get('num_train_epochs', 50)),
+        learning_rate=float(training_config.get('learning_rate', 1e-4)),
         bf16=bool(training_config.get('bf16', True)),
         logging_steps=int(training_config.get('logging_steps', 10)),
-        save_steps=int(training_config.get('save_steps', 50)),
+        save_steps=int(training_config.get('save_steps', 10)),
         save_total_limit=int(training_config.get('save_total_limit', 100)),
         dataloader_num_workers=int(training_config.get('dataloader_num_workers', 1)),
-        warmup_ratio=float(training_config.get('warmup_ratio', 0.01)),
+        warmup_ratio=float(training_config.get('warmup_ratio', 0.1)),
         lr_scheduler_type=str(training_config.get('lr_scheduler_type', "cosine")),
         report_to="tensorboard",
-        logging_dir=os.path.join(output_dir, "logs")
+        logging_dir=os.path.join(output_dir, "logs"),
+        gradient_checkpointing=False,  # Already enabled manually on model, don't duplicate
+        # Add following parameters to resolve gradient issues
+        remove_unused_columns=False,  # Keep all columns
+        dataloader_pin_memory=False,  # May help avoid certain CUDA issues
+        save_safetensors=False
     )
     
     trainer = Trainer(
@@ -195,8 +232,8 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         print("Merging LoRA weights to base model...")
         merged_model = model.merge_and_unload()
         
-        # Save the merged complete model
-        merged_model.save_pretrained(output_dir)
+        # Save the merged complete model with updated method
+        merged_model.save_pretrained(output_dir, safe_serialization=False)
         print(f"LoRA weights merged and complete model saved to {output_dir}")
     else:
         # If not using LoRA, save complete model

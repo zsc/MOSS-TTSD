@@ -170,7 +170,62 @@ python gradio_demo.py
 
 ### API Usage
 
-Powered by siliconflow. Stay tuned!
+#### Batch Processing Tool
+
+We provide a batch processing tool (`use_api.py`) that can process multiple dialogue generation requests concurrently using the SiliconFlow API.
+
+##### Environment Setup
+
+Before using the batch processing tool, you need to set up environment variables for API authentication:
+
+```bash
+export SILICONFLOW_API_KEY="your_siliconflow_api_key"
+export SILICONFLOW_API_BASE="https://api.siliconflow.cn/v1"  
+```
+
+##### Usage
+
+```bash
+python use_api.py --jsonl_file your_data.jsonl --output_dir your_output --max_workers 8
+```
+
+##### Parameters
+
+- `--jsonl_file`: Path to input JSONL file (default: `examples/examples.jsonl`)
+- `--output_dir`: Output directory for generated audio files (default: `api_outputs`)
+- `--max_workers`: Maximum number of concurrent workers (default: 8)
+
+##### Input Format
+
+The tool supports the same JSONL formats as local inference:
+
+**Format 1: Separate speaker audio references**
+```json
+{
+  "base_path": "/path/to/audio/files",
+  "text": "[S1]Hello there![S2]Hi, how are you?[S1]I'm doing great!",
+  "prompt_audio_speaker1": "speaker1_reference.wav",
+  "prompt_text_speaker1": "Reference text for speaker 1",
+  "prompt_audio_speaker2": "speaker2_reference.wav",
+  "prompt_text_speaker2": "Reference text for speaker 2"
+}
+```
+
+**Format 2: Shared audio reference**
+```json
+{
+  "base_path": "/path/to/audio/files", 
+  "text": "[S1]Hello there![S2]Hi, how are you?[S1]I'm doing great!",
+  "prompt_audio": "shared_reference.wav",
+  "prompt_text": "[S1]Reference for speaker 1[S2]Reference for speaker 2"
+}
+```
+
+##### Output
+
+The tool generates:
+1. Individual audio files named `output_XXXX.wav` in the specified output directory
+2. A `output_results.jsonl` file containing processing results with file paths
 
 ### Podcast Generation
 
@@ -316,23 +371,7 @@ python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_pro
 
 #### LoRA Configuration
 
-When using `--lora`, you can customize the LoRA parameters by editing the configuration file `lora_config.yaml`. The default configuration is:
-
-```yaml
-r: 8
-lora_alpha: 16
-target_modules:
-  - "q_proj"
-  - "k_proj" 
-  - "v_proj"
-  - "o_proj"
-  - "gate_proj"
-  - "up_proj"
-  - "down_proj"
-lora_dropout: 0.05
-bias: "none"
-use_rslora: true
-```
+When using `--lora`, you can customize the LoRA parameters by editing the configuration file `lora_config.yaml`. 
 
 **LoRA Parameters:**
 - **r (rank)**: Controls the bottleneck size. Lower values use less memory but may limit adaptation capability
@@ -345,13 +384,13 @@ use_rslora: true
 
 The training parameters can be configured via a YAML file. The default configuration is located at `finetune/training_config.yaml`. Key parameters include:
 
-- `per_device_train_batch_size`: Batch size per device (default: 1)
-- `gradient_accumulation_steps`: Steps to accumulate gradients (default: 1)
-- `num_train_epochs`: Number of training epochs (default: 20)
-- `learning_rate`: Learning rate (default: 1e-5)
-- `bf16`: Use bfloat16 precision (default: true)
-- `warmup_ratio`: Warmup ratio (default: 0.01)
-- `lr_scheduler_type`: Learning rate scheduler (default: "cosine")
+- `per_device_train_batch_size`: Batch size per device
+- `gradient_accumulation_steps`: Steps to accumulate gradients
+- `num_train_epochs`: Number of training epochs
+- `learning_rate`: Learning rate
+- `bf16`: Use bfloat16 precision
+- `warmup_ratio`: Warmup ratio
+- `lr_scheduler_type`: Learning rate scheduler
 
 ### One-Click Fine-Tuning Workflow
 

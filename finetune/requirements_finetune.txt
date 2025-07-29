@@ -17,4 +17,5 @@ huggingface_hub
 tensorboard
 torch-tb-profiler
 peft
+liger_kernel
 # flash-attn    # Need to install separately
