@@ -305,8 +305,6 @@ Once you have prepared the JSONL file, you can manually preprocess the data usin
 python finetune/data_preprocess.py --jsonl <path_to_jsonl> --model_path <path_to_model> --output_dir <output_directory> --data_name <data_name> [--use_normalize]
 ```
 
-> **⚠️ Important**: For better stability and to avoid path resolution issues, we strongly recommend using absolute paths for all file and directory parameters instead of relative paths.
-
 #### Parameters
 
 - `--jsonl`: Path to the JSONL input file (required)
@@ -358,6 +356,17 @@ python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_pro
 **LoRA fine-tuning:**
 ```bash
 python finetune/finetune.py --model_path <path_to_model> --data_dir <path_to_processed_data> --output_dir <output_directory> --training_config <training_config_file> --lora_config <lora_config_file>  --lora
+```
+
+**Multi-GPU Training:**
+```bash
+torchrun --nproc_per_node=8 --master_port=29500 finetune/finetune.py \
+    --model_path <path_to_model> \
+    --data_dir <path_to_processed_data> \
+    --output_dir <output_directory> \
+    --training_config <training_config_file> \
+    --lora_config <lora_config_file> \
+    --lora
 ```
 
 #### Parameters
@@ -436,8 +445,6 @@ lora_config_file : /path/to/lora_config.yaml
 ```bash
 python finetune/finetune_workflow.py --config path/to/your/config.yaml [--pass_data_preprocess]
 ```
-
-> **💡 Tip**: Use absolute paths in the configuration file to avoid path resolution issues.
 
 #### Parameters
 
