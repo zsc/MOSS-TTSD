@@ -125,9 +125,8 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         model_path, 
         torch_dtype=torch.bfloat16, 
         attn_implementation="flash_attention_2",
-        device_map="auto",  # Enable automatic device mapping with CPU offloading support
-        offload_folder="offload",  # Specify offload folder (will be created automatically)
-        offload_state_dict=True  # Enable state dict offload to CPU
+        offload_folder="offload",
+        offload_state_dict=True
     )
     
     model.set_weights([8,2,1,1,1,1,1,1])
@@ -138,8 +137,10 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
     
     # Enable gradient checkpointing first (on base model)
     if training_config.get('gradient_checkpointing', True):
-        model.gradient_checkpointing_enable()  # Enable gradient checkpointing
-        print("Gradient checkpointing enabled")
+        model.gradient_checkpointing_enable( 
+            gradient_checkpointing_kwargs={"use_reentrant": False}
+        )
+        print("Gradient checkpointing enabled with use_reentrant=False")
     
     # Configure LoRA parameters if using LoRA
     if use_lora:
@@ -176,9 +177,11 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         
         # Re-enable gradient checkpointing on PEFT model (to ensure compatibility)
         if training_config.get('gradient_checkpointing', True):
-            # Call base model's method
-            model.base_model.gradient_checkpointing_enable()
-            print("Re-enabled gradient checkpointing on LoRA base model")
+            # Call base model's method with gradient_checkpointing_kwargs
+            model.base_model.gradient_checkpointing_enable(
+                gradient_checkpointing_kwargs={"use_reentrant": False}
+            )
+            print("Re-enabled gradient checkpointing on LoRA base model with use_reentrant=False")
         
         # Ensure model is in training mode and verify trainable parameters
         model.train()
@@ -212,7 +215,8 @@ def train(model_path : str, data_dir : str, output_dir : str, training_config : 
         # Add following parameters to resolve gradient issues
         remove_unused_columns=False,  # Keep all columns
         dataloader_pin_memory=False,  # May help avoid certain CUDA issues
-        save_safetensors=False
+        save_safetensors=False,
+        ddp_find_unused_parameters=False
     )
     
     trainer = Trainer(
